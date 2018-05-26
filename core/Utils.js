@@ -1,10 +1,11 @@
 const path = require('path'),
   fs = require('fs'),
+  logger = require('log4js').getLogger(),
   appDir = path.dirname(require.main.filename),
   crypto = require('crypto'),
   moment = require('moment');
 const CONSTRUCTOR = "constructor";
-const excludeFolder = /node_modules|\.git/
+const exclude = /node_modules|\.git/
 const STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg,
   ARGUMENT_NAMES = /([^\s,]+)/g
 module.exports = {
@@ -29,8 +30,7 @@ module.exports = {
 
         let absPath = path.resolve(current, dir),
           stat = fs.statSync(absPath);
-
-        if (excludeFolder.test(absPath))
+        if (exclude.test(dir))
           continue; //don't want node_module ;)
         if (stat.isDirectory()) {
           folders.push(absPath);
