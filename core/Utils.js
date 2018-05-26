@@ -16,7 +16,7 @@ module.exports = {
     return moment(date).utc().format("DD/MM/YY, HH:mm [EVETIME]")
   },
   loadFiles(regexp, baseFolder) {
-    let root = baseFolder ? appDir + path.sep + baseFolder : appDir;
+    let root = baseFolder ? (path.isAbsolute(baseFolder) ? baseFolder : appDir + path.sep + baseFolder) : appDir;
     let folders = [root];
     if (!(regexp instanceof RegExp))
       regexp = new RegExp(regexp);

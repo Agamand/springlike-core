@@ -9,8 +9,8 @@ const remoteService = Conf.get('remote.services', {});
 const service = Service = {
   services: {},
   instance: {},
-  load(regexp) {
-    Utils.loadFiles(regexp).forEach((service) => {
+  load(regexp, basefolder) {
+    Utils.loadFiles(regexp, basefolder).forEach((service) => {
       this.register(service);
     })
   },
