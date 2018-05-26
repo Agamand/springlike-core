@@ -1,0 +1,8 @@
+node_modules/
+*.lastKillMail
+api.json
+token.json
+conf/config.js
+*.lastNotification
+data/*
+logs/*

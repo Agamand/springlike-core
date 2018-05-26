@@ -1,0 +1,23 @@
+{
+  "name": "aga-core",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2",
+    "fetch-swagger-schema": "^0.1.2",
+    "js-yaml": "^3.11.0",
+    "log4js": "^2.5.3",
+    "moment": "^2.20.1",
+    "nedb": "^1.8.0"
+  },
+  "publishConfig": {
+    "registry": "http://npm.agamand.com"
+  }
+}
