@@ -5,7 +5,7 @@ const path = require('path'),
 
 
 const logger = require('log4js').getLogger();
-const remoteService = Conf.get('remote.services', {});
+
 const service = Service = {
   services: {},
   instance: {},
@@ -25,6 +25,10 @@ const service = Service = {
     return this.services[className];
   },
   get(className) {
+    const serviceConf = Conf.get('services', {});
+    const remoteConf = Conf.get('remote', {
+      enable: false
+    });
     if (this.instance[className])
       return this.instance[className];
 
@@ -35,24 +39,32 @@ const service = Service = {
 
 
     let instance = null;
-    console.log(remoteService);
-    if (remoteService[className]) {
+    if (this.services[className].allowRemote && remoteConf.enable && !serviceConf[className]) {
       logger.debug('Instanciate remote', className);
       instance = new Remote(className);
     } else {
       logger.debug('Instanciate', className);
       instance = new this.services[className]();
+
     }
     return (this.instance[className] = instance)
   },
-  preLoad() {
+  preLoad(...serviceName) {
+    let service2Preload = {}
+    for (let key of serviceName) {
+      service2Preload[key] = true;
+    }
+
     logger.debug('Preload services');
     for (let serviceKey in this.services) {
       let service = this.services[serviceKey];
-      if (service.preload)
+      if (service.preload || service2Preload[serviceKey])
         this.get(serviceKey);
     }
   }
+
+}
+class ServiceProvider {
 
 }
 
@@ -65,7 +77,9 @@ class Remote {
     for (let name of functions) {
       var me = this;
       me[name] = function(...args) {
-        return remoteService.callRemoteService(serviceName, name, args);
+        return remoteService.getRemoteService(serviceName).then((serviceInfo) => {
+          return remoteService.callRemoteService(serviceName, serviceInfo, name, args);
+        });
       }
 
     }

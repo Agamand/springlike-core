@@ -88,10 +88,19 @@ class RESTService {
     return `${protocol}://${host}${port}${path}`
   }
 }
+
+
+
+
+const QUERY_OR_PATH = {
+  path: 1,
+  query: 1
+};
 const validateQuery = function(requestParam, params) {
   for (let key in params) {
     let type = params[key];
-    if (!(key in requestParam[type]) && type != 'body') {
+    //if a query or path param and there no value
+    if (!(key in requestParam[type]) && (type in QUERY_OR_PATH)) {
 
       logger.debug(key, type, 'not found in param', requestParam);
       return false;
@@ -103,10 +112,10 @@ const validateQuery = function(requestParam, params) {
   return true;
 }
 const getParamValue = function(type, name, requestParam) {
-  if (type != 'body')
-    return requestParam[type] && requestParam[type][name] || null;
+  if (type == 'body' || type == 'context')
+    return requestParam[type] || null;
 
-  return requestParam[type] || null;
+  return requestParam[type] && requestParam[type][name] || null;
 }
 
 const getParams = function(requestParam, params, functionParams) {
@@ -125,11 +134,11 @@ const wrapHandler = function(handler, params, context, secure) {
       return;
     }
     let requestParam = {
+      context: req,
       path: req.params || {},
       query: req.query || {},
       body: req.body || {}
     }
-    console.log('reqparam', requestParam);
     if (!validateQuery(requestParam, params)) {
 
       logger.debug('query not valid');

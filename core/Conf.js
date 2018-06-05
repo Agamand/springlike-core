@@ -18,7 +18,12 @@ const _ConfigMgr = ConfigMgr = Conf = {
   },
   get(path, defaultValue) {
     defaultValue = defaultValue || null;
-    return this.traverse(path) || defaultValue;
+    let value = this.traverse(path);
+    if (defaultValue && value && defaultValue.constructor.name === "Object" && value.constructor.name === "Object")
+      return { ...defaultValue,
+        ...value
+      }
+    return value || defaultValue;
   },
   set(path, value) {
     this.traverseAndSet(path, value);
@@ -82,6 +87,7 @@ const _ConfigMgr = ConfigMgr = Conf = {
 
     }
     return tmp[path[len]] = value;
+
   }
 };
 module.exports = ConfigMgr
