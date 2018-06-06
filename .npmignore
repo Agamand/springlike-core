@@ -6,3 +6,4 @@ conf/config.js
 *.lastNotification
 Jenkinsfile
 Dockerfile
+*.tgz

@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    options {
+      buildDiscarder(logRotator(numToKeepStr: '6', artifactNumToKeepStr: '6'))
+    }
     stages {
       stage('Package') {
           agent {
@@ -9,7 +12,6 @@ pipeline {
             }
           }
           steps {
-              setNewVersion()
               sh 'npm pack'
           }
       }
@@ -27,7 +29,7 @@ pipeline {
               echo //npm.agamand.com/:username=$NPM_USERNAME >> ~/.npmrc
               echo //npm.agamand.com/:email=$NPM_EMAIL >> ~/.npmrc
               echo //npm.agamand.com/:always-auth=true >> ~/.npmrc
-              npm publish
+              npm publish -f
             '''
           }
       }
@@ -37,10 +39,4 @@ pipeline {
           archiveArtifacts artifacts:'*.tgz'
       }
     }
-}
-
-def setNewVersion(){
-    def version= sh(returnStdout: true, script: 'node -p "require(\'./package.json\').version"').trim();
-    echo "${version}.${env.BUILD_ID}"
-    sh "npm version ${version}-${env.BUILD_ID}"
 }
