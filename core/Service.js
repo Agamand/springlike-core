@@ -41,7 +41,7 @@ const service = Service = {
     let instance = null;
     if (this.services[className].allowRemote && remoteConf.enable && !serviceConf[className]) {
       logger.debug('Instanciate remote', className);
-      instance = new Remote(className);
+      instance = Remote(className);
     } else {
       logger.debug('Instanciate', className);
       instance = new this.services[className]();
@@ -69,22 +69,21 @@ class ServiceProvider {
 }
 
 
-class Remote {
-  constructor(serviceName) {
-    const remoteService = Service.get("RemoteService")
-    let serviceClass = Service.getClass(serviceName);
-    let functions = Utils.getClassFunction(serviceClass);
-    for (let name of functions) {
-      var me = this;
-      me[name] = function(...args) {
+let Remote = (serviceName) => {
+  const remoteService = Service.get("RemoteService")
+  let serviceClass = Service.getClass(serviceName);
+  let functions = Utils.getClassFunction(serviceClass);
+  return new Proxy({}, {
+    get: function(obj, target) {
+      return function(...args) {
         return remoteService.getRemoteService(serviceName).then((serviceInfo) => {
-          return remoteService.callRemoteService(serviceName, serviceInfo, name, args);
+          return remoteService.callRemoteService(serviceName, serviceInfo, target, args);
         });
       }
-
     }
-  }
-
+  });
 }
+
+
 
 module.exports = service;
