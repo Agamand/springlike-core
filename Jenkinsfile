@@ -13,7 +13,7 @@ pipeline {
             }
           }
           steps {
-              sh 'npm intall && npm run build'
+              sh 'npm install && npm run build'
           }
       }
       stage('Package') {
@@ -49,6 +49,7 @@ pipeline {
     post {
       always {
           archiveArtifacts artifacts:'*.tgz'
+          publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'docs', reportFiles: 'index.html', reportName: 'Docs', reportTitles: ''])
       }
     }
 }
