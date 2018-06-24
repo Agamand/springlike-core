@@ -20,6 +20,8 @@
     "@types/mongodb": "^3.0.19",
     "@types/nedb": "^1.8.5",
     "@types/request": "^2.47.0",
+    "@types/adm-zip": "^0.4.31",
+    "@types/node": "^10.3.2",
     "adm-zip": "^0.4.11",
     "express": "^4.16.2",
     "fetch-swagger-schema": "^0.1.2",
@@ -34,8 +36,6 @@
     "registry": "http://npm.agamand.com"
   },
   "devDependencies": {
-    "@types/adm-zip": "^0.4.31",
-    "@types/node": "^10.3.2",
     "coveralls": "^3.0.1",
     "istanbul": "^0.4.5",
     "jenkins-mocha": "^6.0.0",

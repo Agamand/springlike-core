@@ -3,7 +3,19 @@ pipeline {
     options {
       buildDiscarder(logRotator(numToKeepStr: '6', artifactNumToKeepStr: '6'))
     }
-    stages {
+    stages {      
+      
+      stage('build') {
+          agent {
+            docker {
+                image 'node:7-alpine'
+                reuseNode true
+            }
+          }
+          steps {
+              sh 'npm intall && npm run build'
+          }
+      }
       stage('Package') {
           agent {
             docker {
