@@ -1,24 +1,28 @@
-const Datastore = require('nedb')
+import log4js from 'log4js';
+import Datastore from 'nedb';
+import { IDataProvider } from '../DataService';
 
 
 const logger = require('log4js').getLogger();
-class NeDBImpl {
-  constructor(conf) {
+class NeDBImpl implements IDataProvider {
+  dataPath: string
+  collections: { [key: string]: Datastore }
+  constructor(conf: any) {
     this.dataPath = conf.path
     this.collections = {};
   }
-  getCollection(name) {
+  getCollection(name: string) {
     if (this.collections[name])
       return this.collections[name];
     logger.debug('load NeDB collection', name, this.dataPath + '/' + name)
-    this.collections[name] = this.db = new Datastore({
+    this.collections[name] = new Datastore({
       filename: this.dataPath + '/' + name,
       autoload: true
     })
     this.collections[name].persistence.setAutocompactionInterval(5000);
     return this.collections[name];
   }
-  insert(collection, data) {
+  insert(collection: string, data: any) {
     return new Promise((resolve, reject) => {
       this.getCollection(collection).insert(data, (err, newDocs) => {
         if (err) {
@@ -29,9 +33,9 @@ class NeDBImpl {
       })
     })
   }
-  find(collection, filter) {
+  find(collection: string, filter: any) {
     return new Promise((resolve, reject) => {
-      this.getCollection(collection).find(filter, (err, docs) => {
+      this.getCollection(collection).find(filter, (err: Error, docs: any) => {
         if (err) {
 
           logger.error('Error while finding in', collection, err);
@@ -41,7 +45,7 @@ class NeDBImpl {
       })
     })
   }
-  findOne(collection, filter) {
+  findOne(collection: string, filter: any) {
     return new Promise((resolve, reject) => {
       this.getCollection(collection).findOne(filter, (err, docs) => {
         if (err) {
@@ -52,7 +56,7 @@ class NeDBImpl {
       })
     })
   }
-  update(collection, filter, update, options) {
+  update(collection: string, filter: any, update: any, options: any) {
     options = options || {}
     return new Promise((resolve, reject) => {
       this.getCollection(collection).update(filter, update, options, (err, docs) => {
@@ -64,7 +68,7 @@ class NeDBImpl {
       })
     })
   }
-  remove(collection, filter) {
+  remove(collection: string, filter: any) {
     let options = {
       multi: true
     }
@@ -78,10 +82,10 @@ class NeDBImpl {
       })
     })
   }
-  removeOne(collection, filter) {
+  removeOne(collection: string, filter: any) {
     let options = {}
     return new Promise((resolve, reject) => {
-      this.getCollection(collection).remove(filter, options, (err, docs) => {
+      this.getCollection(collection).remove(filter, options, (err: Error, docs) => {
         if (err) {
           logger.error('Error while removing', collection, err);
           return reject(err);
@@ -90,21 +94,20 @@ class NeDBImpl {
       })
     })
   }
-  ensureIndex(collection, fields, options) {
+  ensureIndex(collection: string, fields: any, options: any) {
     options = options || {};
     let fieldNames = Object.keys(fields);
     return new Promise((resolve, reject) => {
-      this.getCollection(collection).ensureIndex({ ...options,
+      this.getCollection(collection).ensureIndex({
+        ...options,
         fieldName: fieldNames
-      }, (err, docs) => {
+      }, (err: Error) => {
         if (err) {
           logger.error('Error while removing', collection, err);
           return reject(err);
         }
-        resolve(docs)
+        resolve()
       })
     })
   }
 }
-
-module.exports = NeDBImpl;

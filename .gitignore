@@ -6,3 +6,6 @@ conf/config.js
 *.lastNotification
 data/*
 logs/*
+lib
+types
+docs
