@@ -11,7 +11,7 @@ import Utils from './Utils';
 import { PathParams, Request } from 'express-serve-static-core';
 import Service, { AsService } from './Service';
 import request, * as RequestModule from 'request';
-import { resolve } from 'url';
+import { resolve, URL } from 'url';
 import { rejects } from 'assert';
 const collection = 'cache',
   logger = log4js.getLogger();
@@ -259,7 +259,8 @@ export class RequestBuilder {
   constructor() {
   }
   protocol(protocol: string): RequestBuilder {
-    this._protocol = protocol;
+    this._protocol = protocol.replace(/:/, '');
+
     return this;
   }
   host(host: string): RequestBuilder {
@@ -289,6 +290,10 @@ export class RequestBuilder {
   param(type: string, name: string, value: any): RequestBuilder {
     this._params[type] = this._params[type] || {};
     this._params[type][name] = value;
+    return this;
+  }
+  body(value: any) {
+    this._params["body"] = value;
     return this;
   }
   context(context: any): RequestBuilder {
@@ -323,7 +328,8 @@ export class RequestBuilder {
         request({
           method: me._method,
           url: url,
-          headers:this.header,
+          headers: me._header,
+          body: me._params["body"] || null,
           json: true
         }, function (error: any, response: request.Response, body: any) {
           if (error) {
@@ -360,16 +366,20 @@ export function QueryParam(key: string) {
     current[key] = parameterIndex
     Reflect.defineMetadata(queryParamMetadataKey, current, target, propertyKey);
   }
-} export function HeaderParam(key: string) {
+} export function HeaderParam(key: string, value: Function = (value: any) => { return value; }) {
   return function (target: Object, propertyKey: string | symbol, parameterIndex: number) {
     console.log('call QueryParam', propertyKey);
     const current = Reflect.getOwnMetadata(headerParamMetadataKey, target, propertyKey) || {};
-    current[key] = parameterIndex
+    current[key] = { index: parameterIndex, evaluate: value };
     Reflect.defineMetadata(headerParamMetadataKey, current, target, propertyKey);
   }
 }
 export function Body(target: Object, propertyKey: string | symbol, parameterIndex: number) {
   Reflect.defineMetadata(bodyMetadataKey, parameterIndex, target, propertyKey);
+}
+
+export function AuthBearer() {
+  return HeaderParam('Authorization', (value: any) => { return `Bearer ${value}` })
 }
 
 export const Method = function (method: string) {
@@ -402,7 +412,19 @@ export const RestController = function (clazz: Function) {
   //overload ctor and inject rest endpoint
 }
 
-export function createClient(host: string, clazz: Function) {
+
+export interface IParamProvider {
+  resolve(): Promise<any>
+}
+
+export interface ICacheProvider {
+  get(): Promise<any>
+}
+
+
+export function createClient(baseUrl: string, clazz: Function, paramProvider?: IParamProvider, useCache: boolean = true) {
+
+  const url: URL = new URL(baseUrl);
   return new Proxy(clazz.prototype, {
     get: function (target: any, key: PropertyKey) {
       console.log(Reflect.getOwnMetadataKeys(target, key.toString()));
@@ -411,41 +433,49 @@ export function createClient(host: string, clazz: Function) {
       const queryParam = Reflect.getOwnMetadata(queryParamMetadataKey, target, key.toString());
       const pathParam = Reflect.getOwnMetadata(pathParamMetadataKey, target, key.toString());
       const headerParam = Reflect.getOwnMetadata(headerParamMetadataKey, target, key.toString());
+      const bodyIndex = Reflect.getOwnMetadata(bodyMetadataKey, target, key.toString());
 
       return function (...args: Array<any>) {
-
+        let injectedParam = paramProvider && paramProvider.resolve() || Promise.resolve({});
         console.log('call proxied method', key, method, path, queryParam, pathParam)
-        let requestBuilder = new RequestBuilder();
-        requestBuilder.host(host);
-        if (method)
-          requestBuilder.method(method);
-        if (path)
-          requestBuilder.path(method);
+        return injectedParam.then((injectedParam) => {
+          let requestBuilder = new RequestBuilder();
+          requestBuilder.host(url.hostname);
+          requestBuilder.protocol(url.protocol);
 
-        if (queryParam) {
-          for (let key in queryParam) {
-            let index = queryParam[key];
-            if (args.length > index)
-              requestBuilder.param('query', key, args[index]);
-          }
-        }
-        if (pathParam) {
-          for (let key in pathParam) {
-            let index = pathParam[key];
-            if (args.length > index)
-              requestBuilder.param('path', key, args[index]);
-          }
-        }
-        if (headerParam) {
-          for (let key in headerParam) {
-            let index = headerParam[key];
-            if (args.length > index)
-              requestBuilder.header(key, args[index]);
-          }
-        }
+          if (method)
+            requestBuilder.method(method);
+          if (path)
+            requestBuilder.path(path);
 
-
-        return requestBuilder.build()();
+          if (queryParam) {
+            for (let key in queryParam) {
+              let index = queryParam[key];
+              if (args.length > index)
+                requestBuilder.param('query', key, args[index] || injectedParam[key]);
+            }
+          }
+          if (pathParam) {
+            for (let key in pathParam) {
+              let index = pathParam[key];
+              if (args.length > index)
+                requestBuilder.param('path', key, args[index] || injectedParam[key]);
+            }
+          }
+          if (headerParam) {
+            for (let key in headerParam) {
+              let header = headerParam[key];
+              if (args.length > header.index) {
+                let value = args[header.index] || injectedParam[key];
+                requestBuilder.header(key, value && header.evaluate(value));
+              }
+            }
+          }
+          if (bodyIndex) {
+            requestBuilder.body(args[bodyIndex])
+          }
+          return requestBuilder.build()();
+        })
       }
     }
   })
