@@ -13,6 +13,7 @@ import Service, { AsService } from './Service';
 import request, * as RequestModule from 'request';
 import { resolve, URL } from 'url';
 import { rejects } from 'assert';
+import { CacheService } from '..';
 const collection = 'cache',
   logger = log4js.getLogger();
 
@@ -412,6 +413,7 @@ export const RestController = function (clazz: Function) {
 
 export interface IParamProvider {
   resolve(): Promise<any>
+  getKey(): string;
 }
 
 export interface ICacheProvider {
@@ -422,6 +424,7 @@ export interface ICacheProvider {
 export function createClient(baseUrl: string, clazz: Function, paramProvider?: IParamProvider, useCache: boolean = true) {
 
   const url: URL = new URL(baseUrl);
+  const cacheService: CacheService = Service.get('CacheService');
   return new Proxy(clazz.prototype, {
     get: function (target: any, key: PropertyKey) {
       const method = Reflect.getOwnMetadata(methodMetadataKey, target, key.toString());
@@ -431,51 +434,62 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
       const headerParam = Reflect.getOwnMetadata(headerParamMetadataKey, target, key.toString());
       const bodyIndex = Reflect.getOwnMetadata(bodyMetadataKey, target, key.toString());
 
-      return function (...args: Array<any>) {
-        let injectedParam = paramProvider && paramProvider.resolve() || Promise.resolve({});
+      return async function (...args: Array<any>) {
+
+        let cacheKey: string;
+        if (paramProvider) {
+          cacheKey = [method, paramProvider.getKey(), ...args].join('-');
+        }
+        else cacheKey = [].join('-')
+
+        try {
+          return cacheService.get(cacheKey);
+        }catch(e){}
+
+        let injectedParam = await (paramProvider && paramProvider.resolve() || Promise.resolve({}));
         console.log('call proxied method', key, method, path, queryParam, pathParam)
-        return injectedParam.then((injectedParam) => {
-          let requestBuilder = new RequestBuilder();
-          requestBuilder.host(url.hostname);
-          requestBuilder.protocol(url.protocol);
 
-          if (method)
-            requestBuilder.method(method);
-          if (path)
-            requestBuilder.path(path);
+        let requestBuilder = new RequestBuilder();
+        requestBuilder.host(url.hostname);
+        requestBuilder.protocol(url.protocol);
 
-          if (queryParam) {
-            for (let key in queryParam) {
-              let index = queryParam[key];
-              let value = args[index] || injectedParam[key];
-              if (undefined !== value)
-                requestBuilder.param('query', key, value);
-            }
-          }
-          if (pathParam) {
-            for (let key in pathParam) {
-              let index = pathParam[key];
-              let value = args[index] || injectedParam[key];
-              if (undefined !== value)
-                requestBuilder.param('path', key, value);
-            }
-          }
-          if (headerParam) {
-            for (let key in headerParam) {
-              let header = headerParam[key];
-              let value = args[header.index] || injectedParam[key];
-              if (undefined !== value) {
-                requestBuilder.header(key, header.evaluate(value));
-              }
-            }
-          }
-          if (bodyIndex) {
-            let value = args[bodyIndex]
+        if (method)
+          requestBuilder.method(method);
+        if (path)
+          requestBuilder.path(path);
+
+        if (queryParam) {
+          for (let key in queryParam) {
+            let index = queryParam[key];
+            let value = args[index] || injectedParam[key];
             if (undefined !== value)
-              requestBuilder.body(args[bodyIndex])
+              requestBuilder.param('query', key, value);
           }
-          return requestBuilder.build()();
-        })
+        }
+        if (pathParam) {
+          for (let key in pathParam) {
+            let index = pathParam[key];
+            let value = args[index] || injectedParam[key];
+            if (undefined !== value)
+              requestBuilder.param('path', key, value);
+          }
+        }
+        if (headerParam) {
+          for (let key in headerParam) {
+            let header = headerParam[key];
+            let value = args[header.index] || injectedParam[key];
+            if (undefined !== value) {
+              requestBuilder.header(key, header.evaluate(value));
+            }
+          }
+        }
+        if (bodyIndex) {
+          let value = args[bodyIndex]
+          if (undefined !== value)
+            requestBuilder.body(args[bodyIndex])
+        }
+        return requestBuilder.build()();
+
       }
     }
   })
