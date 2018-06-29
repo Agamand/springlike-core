@@ -2,7 +2,7 @@ import log4js from 'log4js';
 import { MongoClient, Db, Collection, MongoError } from 'mongodb';
 const logger = log4js.getLogger();
 
-class MongoDBImpl {
+export default class MongoDBImpl {
   databaseName: string;
   dbURI: string;
   database: Db;

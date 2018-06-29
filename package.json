@@ -16,13 +16,7 @@
   "author": "Agamand <basset.cyril@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@types/body-parser": "^1.17.0",
-    "@types/express": "^4.16.0",
-    "@types/mongodb": "^3.0.19",
-    "@types/nedb": "^1.8.5",
-    "@types/request": "^2.47.0",
-    "@types/adm-zip": "^0.4.31",
-    "@types/node": "^10.3.2",
+
     "adm-zip": "^0.4.11",
     "express": "^4.16.2",
     "fetch-swagger-schema": "^0.1.2",
@@ -31,12 +25,19 @@
     "moment": "^2.20.1",
     "mongodb": "^3.0.10",
     "nedb": "^1.8.0",
-    "reflect-metadata": "^0.1.12"
+    "reflect-metadata": "^0.1.12",
+    "@types/request": "^2.47.0"
   },
   "publishConfig": {
     "registry": "http://npm.agamand.com"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.17.0",
+    "@types/express": "^4.16.0",
+    "@types/mongodb": "^3.0.19",
+    "@types/nedb": "^1.8.5",
+    "@types/adm-zip": "^0.4.31",
+    "@types/node": "^10.3.2",
     "coveralls": "^3.0.1",
     "istanbul": "^0.4.5",
     "jenkins-mocha": "^6.0.0",

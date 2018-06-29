@@ -4,7 +4,7 @@ import { IDataProvider } from '../DataService';
 
 
 const logger = require('log4js').getLogger();
-class NeDBImpl implements IDataProvider {
+export default class NeDBImpl implements IDataProvider {
   dataPath: string
   collections: { [key: string]: Datastore }
   constructor(conf: any) {

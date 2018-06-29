@@ -75,23 +75,16 @@ export default Service;
 
 
 export function AsService(clazz: Function) {
-  logger.debug("AsService INVOKE", clazz.name);
   Service.register(clazz);
 }
 
 
 export function AutoService(serviceNameOrTarget?: any, key?: string): any {
   const apply = function (target: any, key: string): any {
-
     const type = Reflect.getMetadata("design:type", target, key);;
-    logger.debug('Autoservice INVOKE', target, key, type);
-
     const prop = Reflect.getOwnPropertyDescriptor(target, key);
-
-    logger.debug('Autoservice INVOKE2', target, key, prop);
     // property getter
     var getter = function () {
-      logger.debug('AutoService')
       return Service.get(type.name);
     };
 
@@ -105,9 +98,6 @@ export function AutoService(serviceNameOrTarget?: any, key?: string): any {
       enumerable: true,
       configurable: true
     });
-    for (let key of Object.getOwnPropertyNames(target)) {
-      logger.debug('prop from', target.name, key);
-    }
   }
   if (typeof serviceNameOrTarget === 'string') {
     return apply;

@@ -19,9 +19,9 @@ const collection = 'cache',
 
 @AsService
 export default class RESTService {
-  app: Express;
-  server: Server;
-  tokens: any;
+  private app: Express;
+  private server: Server;
+  private tokens: any;
   constructor() {
     this.app = express();
     this.app.use(bodyParser.json())
@@ -353,7 +353,7 @@ const methodMetadataKey = Symbol("rest:method");
 const pathMetadataKey = Symbol("rest:path");
 export function PathParam(key: string) {
   return function (target: Object, propertyKey: string | symbol, parameterIndex: number) {
-    console.log('call PathParam', propertyKey);
+
     const current = Reflect.getOwnMetadata(pathParamMetadataKey, target, propertyKey) || {};
     current[key] = parameterIndex
     Reflect.defineMetadata(pathParamMetadataKey, current, target, propertyKey);
@@ -361,14 +361,14 @@ export function PathParam(key: string) {
 }
 export function QueryParam(key: string) {
   return function (target: Object, propertyKey: string | symbol, parameterIndex: number) {
-    console.log('call QueryParam', propertyKey);
+
     const current = Reflect.getOwnMetadata(queryParamMetadataKey, target, propertyKey) || {};
     current[key] = parameterIndex
     Reflect.defineMetadata(queryParamMetadataKey, current, target, propertyKey);
   }
 } export function HeaderParam(key: string, value: Function = (value: any) => { return value; }) {
   return function (target: Object, propertyKey: string | symbol, parameterIndex: number) {
-    console.log('call QueryParam', propertyKey);
+
     const current = Reflect.getOwnMetadata(headerParamMetadataKey, target, propertyKey) || {};
     current[key] = { index: parameterIndex, evaluate: value };
     Reflect.defineMetadata(headerParamMetadataKey, current, target, propertyKey);
@@ -384,7 +384,6 @@ export function AuthBearer() {
 
 export const Method = function (method: string) {
   return function (target: any, key: string, descriptor: PropertyDescriptor) {
-    console.log('call Method', target, key);
     Reflect.defineMetadata(methodMetadataKey, method, target, key);
   }
 }
@@ -398,11 +397,9 @@ export const DELETE = Method('DELETE');
 export const Path = function (path: string) {
   return function (...args: Array<any>) {
     if (typeof args[0] == "function") {
-      console.log('apply path on class');
       const clazz: Function = args[0];
     } else {
       const target: any = args[0], key: string = args[1], descriptor: PropertyDescriptor = args[2];
-      console.log('apply path on method', target, key);
       Reflect.defineMetadata(pathMetadataKey, path, target, key);
     }
   }
@@ -427,7 +424,6 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
   const url: URL = new URL(baseUrl);
   return new Proxy(clazz.prototype, {
     get: function (target: any, key: PropertyKey) {
-      console.log(Reflect.getOwnMetadataKeys(target, key.toString()));
       const method = Reflect.getOwnMetadata(methodMetadataKey, target, key.toString());
       const path = Reflect.getOwnMetadata(pathMetadataKey, target, key.toString());
       const queryParam = Reflect.getOwnMetadata(queryParamMetadataKey, target, key.toString());
@@ -451,28 +447,32 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
           if (queryParam) {
             for (let key in queryParam) {
               let index = queryParam[key];
-              if (args.length > index)
-                requestBuilder.param('query', key, args[index] || injectedParam[key]);
+              let value = args[index] || injectedParam[key];
+              if (undefined !== value)
+                requestBuilder.param('query', key, value);
             }
           }
           if (pathParam) {
             for (let key in pathParam) {
               let index = pathParam[key];
-              if (args.length > index)
-                requestBuilder.param('path', key, args[index] || injectedParam[key]);
+              let value = args[index] || injectedParam[key];
+              if (undefined !== value)
+                requestBuilder.param('path', key, value);
             }
           }
           if (headerParam) {
             for (let key in headerParam) {
               let header = headerParam[key];
-              if (args.length > header.index) {
-                let value = args[header.index] || injectedParam[key];
-                requestBuilder.header(key, value && header.evaluate(value));
+              let value = args[header.index] || injectedParam[key];
+              if (undefined !== value) {
+                requestBuilder.header(key, header.evaluate(value));
               }
             }
           }
           if (bodyIndex) {
-            requestBuilder.body(args[bodyIndex])
+            let value = args[bodyIndex]
+            if (undefined !== value)
+              requestBuilder.body(args[bodyIndex])
           }
           return requestBuilder.build()();
         })
