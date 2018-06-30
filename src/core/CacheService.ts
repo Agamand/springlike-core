@@ -1,9 +1,8 @@
-import log4js from 'log4js';
-import { AsService, AutoService } from './Service';
+import { AsService, AutoService } from '..';
 import DataService from '../database/DataService';
+import { logger } from './Constant';
 
 const collection = 'cache';
-const logger = log4js.getLogger();
 
 @AsService
 export default class CacheService {

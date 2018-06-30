@@ -1,6 +1,5 @@
-import log4js from 'log4js';
 import { MongoClient, Db, Collection, MongoError } from 'mongodb';
-const logger = log4js.getLogger();
+import { logger } from '../../core/Constant';
 
 export default class MongoDBImpl {
   databaseName: string;

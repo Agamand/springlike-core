@@ -1,19 +1,12 @@
 import RESTService from "./RestService";
-import Service, { AsService, AutoService } from "./Service";
+import { AsService, AutoService } from "..";
 import ConfigMgr from "./ConfigMgr";
 import request, { Response } from 'request';
-import express from 'express';
-
-import log4js from 'log4js';
-
-import crypto from 'crypto';
 import Utils from "./Utils";
+import { logger } from "./Constant";
+import Service from "./Service";
 
-
-
-
-const collection = 'cache',
-  logger = log4js.getLogger();
+const collection = 'cache';
 
 
 @AsService

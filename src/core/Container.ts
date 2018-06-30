@@ -1,11 +1,9 @@
 import cluster from 'cluster';
-import log4js from 'log4js';
 import ConfigMgr from './ConfigMgr';
 /* application container*/
 const defaultConfig = {
   cluster: 0
 }
-const logger = log4js.getLogger('aga-core');
 export default abstract class Container {
   private conf: any
   constructor() {

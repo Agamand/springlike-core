@@ -1,4 +1,3 @@
-import log4js from 'log4js';
 import Datastore from 'nedb';
 import { IDataProvider } from '../DataService';
 

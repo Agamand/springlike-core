@@ -1,6 +1,6 @@
 import path from 'path';
 import ConfigMgr from '../core/ConfigMgr';
-import { AsService } from '../core/Service';
+import { AsService } from '..';
 import NeDBImpl from './impl/NeDBImpl';
 import MongoDBImpl from './impl/MongoDBImpl';
 

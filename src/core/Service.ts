@@ -1,13 +1,12 @@
-import log4js from 'log4js';
 import ConfigMgr from './ConfigMgr'
 import path from 'path';
 import fs from 'fs';
 import Utils from './Utils';
 import "reflect-metadata";
 import RemoteService from './RemoteService';
+import { logger } from './Constant';
 
-const logger = log4js.getLogger(),
-  appDir = path.dirname(require.main.filename);
+const appDir = path.dirname(require.main.filename);
 export class ServiceRegistry {
   services: any = {}
   instance: any = {}
@@ -73,53 +72,16 @@ const Service = new ServiceRegistry();
 export default Service;
 
 
-
-export function AsService(clazz: Function) {
-  Service.register(clazz);
-}
-
-
-export function AutoService(serviceNameOrTarget?: any, key?: string): any {
-  const apply = function (target: any, key: string): any {
-    const type = Reflect.getMetadata("design:type", target, key);;
-    const prop = Reflect.getOwnPropertyDescriptor(target, key);
-    // property getter
-    var getter = function () {
-      return Service.get(type.name);
-    };
-
-    // property setter
-    var setter = function (newVal: any) {
-    };
-    // Create new property with getter and setter
-    Object.defineProperty(target, key, {
-      get: getter,
-      set: setter,
-      enumerable: true,
-      configurable: true
-    });
-  }
-  if (typeof serviceNameOrTarget === 'string') {
-    return apply;
-  } else return apply(serviceNameOrTarget, key);
-}
-
-
-
-class ServiceProvider {
-
-}
-
 let Remote = (serviceName: string) => {
-  const remoteService:RemoteService = Service.get("RemoteService")
+  const remoteService: RemoteService = Service.get("RemoteService")
   let serviceClass = Service.getClass(serviceName);
   let functions = Utils.getClassFunction(serviceClass);
   return new Proxy({}, {
     get: function (obj, target) {
       return function (...args: Array<any>) {
-         return remoteService.getRemoteService(serviceName).then((serviceInfo) => {
-           return remoteService.callRemoteService(serviceName, serviceInfo, target.toString(), args);
-         });
+        return remoteService.getRemoteService(serviceName).then((serviceInfo) => {
+          return remoteService.callRemoteService(serviceName, serviceInfo, target.toString(), args);
+        });
       }
     }
   });

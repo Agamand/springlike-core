@@ -5,3 +5,4 @@ logs/*
 lib
 types
 docs
+package-lock.json
