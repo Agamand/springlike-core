@@ -19,17 +19,22 @@ export default class CacheService {
       })
     }, 60000);
   }
-  get(key: string) {
+  async get(key: string): Promise<any> {
     logger.debug('trying to get cache', key);
     return this.dataService.findOne(collection, {
       _id: key
     }).then((data: any) => {
       let currentDate = new Date();
+
+      if (!data) {
+        return Promise.reject(new Error('There is no data cached for the key : ' + key));
+      }
+
       logger.debug('cache from key:', key, 'expireDate:', data.expireDate);
 
-      if (!data || (+currentDate - +data.expireDate) >= 0) {
+      if ((+currentDate - +data.expireDate) >= 0) {
         logger.debug('cache from key:', key, 'is outdated');
-        return Promise.reject('Data expired');
+        return Promise.reject(new Error('Data expired'));
       }
       logger.debug('cache from key:', key, 'is ok');
       return data.data;

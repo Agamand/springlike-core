@@ -55,9 +55,9 @@ interface IArchiver {
 }
 
 export class Zip {
-  path: string
-  exist: boolean
-  zip: AdmZip
+  private path: string
+  private exist: boolean
+  private zip: AdmZip
   constructor(path: string, exist?: boolean) {
     var me = this;
     me.path = path;
@@ -115,7 +115,7 @@ export class Zip {
   addFile(path: string, buffer: string | Buffer) {
     var me = this;
     if (!me.zip) {
-      return me.zip;
+      return me;
     }
     me.zip.addFile(path, typeof buffer == "string" ? new Buffer(buffer) : buffer);
     return me;

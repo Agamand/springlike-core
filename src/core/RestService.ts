@@ -14,6 +14,7 @@ import request, * as RequestModule from 'request';
 import { resolve, URL } from 'url';
 import { rejects } from 'assert';
 import { CacheService } from '..';
+import { Logger } from 'mongodb';
 const collection = 'cache',
   logger = log4js.getLogger();
 
@@ -321,8 +322,8 @@ export class RequestBuilder {
 
   build(): Function {
     const me = this;
-    return function () {
-      return new Promise((resolve: Function, reject: Function) => {
+    return async function (): Promise<request.Response> {
+      return new Promise<request.Response>((resolve: Function, reject: Function) => {
         const url = `${me._protocol}://${me._host}${me.computePath()}`;
         console.log('call request on ', url, me._host, me._path);
 
@@ -337,9 +338,9 @@ export class RequestBuilder {
             return reject(error);
           }
           if (200 != response.statusCode) {
-            return reject('got a ' + response.statusCode + ' status code');
+            return reject(new Error('got a ' + response.statusCode + ' status code'));
           }
-          resolve(body);
+          resolve(response);
         })
       });
     }
@@ -444,7 +445,9 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
 
         try {
           return cacheService.get(cacheKey);
-        }catch(e){}
+        } catch (e) {
+          logger.debug(e.toString())
+        }
 
         let injectedParam = await (paramProvider && paramProvider.resolve() || Promise.resolve({}));
         console.log('call proxied method', key, method, path, queryParam, pathParam)
@@ -488,8 +491,10 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
           if (undefined !== value)
             requestBuilder.body(args[bodyIndex])
         }
-        return requestBuilder.build()();
+        let response: request.Response = await requestBuilder.build()();
 
+        cacheService.add(cacheKey, new Date(response.headers['expires']), response.body);
+        return response.body;
       }
     }
   })
