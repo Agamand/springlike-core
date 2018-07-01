@@ -1,4 +1,4 @@
-import RESTService from "./RestService";
+import RESTService from "./RESTService";
 import { AsService, AutoService } from "..";
 import ConfigMgr from "./ConfigMgr";
 import request, { Response } from 'request';
