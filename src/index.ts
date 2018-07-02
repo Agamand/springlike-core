@@ -11,5 +11,4 @@ export * from './core/RESTBuilder';
 export * from './core/RequestBuilder';
 export * from './core/RESTUtils'
 export * from './core/Service'
-export * from './core/Decorators/RESTDecorator'
-export * from './core/Decorators/ServiceDecorator'
+export * from './core/decorator/'

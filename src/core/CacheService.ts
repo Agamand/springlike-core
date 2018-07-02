@@ -1,6 +1,6 @@
-import { AsService, AutoService } from '..';
 import DataService from '../database/DataService';
 import { logger } from './Constant';
+import { AsService, AutoService } from './decorator';
 
 const collection = 'cache';
 

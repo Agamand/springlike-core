@@ -15,7 +15,7 @@ export class ArchiveUtils {
     }
   }
   public static createArchive(path: string): Zip {
-    var ext = ArchiveUtils.getExt(ext);
+    var ext = ArchiveUtils.getExt(path);
     var toto = {}
 
     if (ext in ArchiveUtils.type) {
@@ -57,11 +57,11 @@ interface IArchiver {
 export class Zip {
   private path: string
   private exist: boolean
-  private zip: AdmZip
+  private zip : AdmZip | null = null;
   constructor(path: string, exist?: boolean) {
-    var me = this;
-    me.path = path;
-    me.exist = exist || false;
+
+    this.path = path;
+    this.exist = exist || false;
   }
   open() {
     var me = this;

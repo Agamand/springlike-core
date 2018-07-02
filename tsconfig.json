@@ -8,19 +8,15 @@
     "noImplicitAny": true,
     "sourceMap": true,
     "outDir": "lib",
-    "baseUrl": ".",
-    "rootDir": "./src",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "declaration": true,
     "declarationDir": "types",
-    "paths": {
-      "*": [
-        "node_modules/*"
-      ]
-    }
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

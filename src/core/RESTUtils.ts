@@ -32,11 +32,12 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
           cacheKey = [method, paramProvider.getKey(), ...args].join('-');
         }
         else cacheKey = [].join('-')
-
-        try {
-          return cacheService.get(cacheKey);
-        } catch (e) {
-          logger.debug(e.toString())
+        if (useCache) {
+          try {
+            return await cacheService.get(cacheKey);
+          } catch (e) {
+            logger.debug(e.toString())
+          }
         }
 
         let injectedParam = await (paramProvider && paramProvider.resolve() || Promise.resolve({}));
@@ -82,8 +83,9 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
             requestBuilder.body(args[bodyIndex])
         }
         let response: request.Response = await requestBuilder.build()();
-
-        cacheService.add(cacheKey, new Date(response.headers['expires']), response.body);
+        if (useCache) {
+          cacheService.add(cacheKey, new Date(response.headers['expires']), response.body);
+        }
         return response.body;
       }
     }

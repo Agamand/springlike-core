@@ -1,10 +1,10 @@
 import RESTService from "./RESTService";
-import { AsService, AutoService } from "..";
 import ConfigMgr from "./ConfigMgr";
 import request, { Response } from 'request';
 import Utils from "./Utils";
 import { logger } from "./Constant";
 import Service from "./Service";
+import { AsService, AutoService } from "./decorator";
 
 const collection = 'cache';
 

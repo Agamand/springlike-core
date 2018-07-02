@@ -6,9 +6,9 @@ import bodyParser from 'body-parser';
 import ConfigMgr from './ConfigMgr';
 import { Server } from 'http';
 import Utils from './Utils';
-import { AsService } from '..';
 import { RestBuilder } from './RESTBuilder';
 import { logger } from './Constant';
+import { AsService } from './decorator';
 const collection = 'cache';
 
 
