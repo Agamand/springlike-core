@@ -4,11 +4,27 @@ pipeline {
       buildDiscarder(logRotator(numToKeepStr: '6', artifactNumToKeepStr: '6'))
     }
     stages {      
-      
+      stage('prepare'){
+        agent {
+            docker {
+                image 'node:10.1-alpine'
+                reuseNode true
+            }
+          }
+        steps{
+          script{
+            if (env.BRANCH_NAME == 'master') {
+              npm.setAsRelease();
+            } else {
+              npm.setAsSnapshot();
+            }
+          }
+        }
+      }
       stage('build') {
           agent {
             docker {
-                image 'node:7-alpine'
+                image 'node:10.1-alpine'
                 reuseNode true
             }
           }
@@ -19,7 +35,7 @@ pipeline {
       stage('Package') {
           agent {
             docker {
-                image 'node:7-alpine'
+                image 'node:10.1-alpine'
                 reuseNode true
             }
           }
@@ -28,10 +44,15 @@ pipeline {
           }
       }
       stage('Deploy') {
-          when{ branch 'master'} 
+          when{
+            anyOf{
+              branch 'master'
+              branch 'develop'
+            } 
+          }
           agent {
             docker {
-                image 'node:7-alpine'
+                image 'node:10.1-alpine'
                 reuseNode true
             }
           }

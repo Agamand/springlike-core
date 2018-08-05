@@ -12,6 +12,7 @@ export interface IParamProvider {
 
 
 
+
 export function createClient(baseUrl: string, clazz: Function, paramProvider?: IParamProvider, useCache: boolean = true) {
 
   const url: URL = new URL(baseUrl);
@@ -29,9 +30,9 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
 
         let cacheKey: string;
         if (paramProvider) {
-          cacheKey = [method, paramProvider.getKey(), ...args].join('-');
+          cacheKey = [key, paramProvider.getKey(), ...args].join('-');
         }
-        else cacheKey = [].join('-')
+        else cacheKey = [key, ...args].join('-')
         if (useCache) {
           try {
             return await cacheService.get(cacheKey);
@@ -54,7 +55,7 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
 
         if (queryParam) {
           for (let key in queryParam) {
-            let index = queryParam[key];
+            let index = queryParam[key].index;
             let value = args[index] || injectedParam[key];
             if (undefined !== value)
               requestBuilder.param('query', key, value);

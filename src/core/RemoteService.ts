@@ -4,7 +4,7 @@ import request, { Response } from 'request';
 import Utils from "./Utils";
 import { logger } from "./Constant";
 import Service from "./Service";
-import { AsService, AutoService } from "./decorator";
+import { AsService, AutoService } from "./decorators";
 
 const collection = 'cache';
 
@@ -41,8 +41,7 @@ export default class RemoteService {
     this.restService.builder()
       .path('/services/:serviceName')
       .param("path", 'serviceName')
-      .param('body', 'serviceInfo')
-      .param('context', 'ctx')
+      .body('serviceInfo')
       .context(this)
       .method('post')
       .handler(this.registerService).build()
@@ -51,7 +50,7 @@ export default class RemoteService {
       .method('post')
       .param("path", 'serviceName')
       .param("path", 'functionName')
-      .param("body", 'data')
+      .body('data')
       .context(this)
       .handler(this.callService).build();
     this.restService.builder()

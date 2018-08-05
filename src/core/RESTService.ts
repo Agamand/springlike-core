@@ -7,8 +7,9 @@ import ConfigMgr from './ConfigMgr';
 import { Server } from 'http';
 import Utils from './Utils';
 import { RestBuilder } from './RESTBuilder';
-import { logger } from './Constant';
-import { AsService } from './decorator';
+import { logger, RESTCONTROLLER_META_KEY, METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY } from './Constant';
+import { AsService } from './decorators';
+//import { registerRestPoint } from './RESTUtils';
 const collection = 'cache';
 
 
@@ -40,13 +41,82 @@ export default class RESTService {
   }
   loadRESTPoint(regexp: RegExp, baseDir: string) {
     Utils.loadFiles(regexp, baseDir).forEach((entry: any) => {
-      if (typeof entry == 'function')
-        entry();
+      if (typeof entry == 'function') {
+        if (entry.prototype) {
+          let isRest: boolean = Reflect.getOwnMetadata(RESTCONTROLLER_META_KEY, entry.prototype);
+          if (isRest) {
+            this.loadRestController(entry);
+          }
+        }
+        else
+          entry();
+
+
+      }
       else if (typeof entry == 'object') {
         for (let k in entry)
           entry[k]();
       }
     })
+  }
+  loadRestController(restController: FunctionConstructor) {
+    let instance: any = new restController();
+
+    let props = Object.getOwnPropertyNames(restController.prototype);
+
+    const restPath = Reflect.getOwnMetadata(PATH_META_KEY, restController.prototype) || '/';
+    for (let key of props) {
+      const method = Reflect.getOwnMetadata(METHOD_META_KEY, restController.prototype, key.toString());
+      if (!method)
+        continue;
+      const path = Reflect.getOwnMetadata(PATH_META_KEY, restController.prototype, key.toString());
+      const queryParams = Reflect.getOwnMetadata(QUERY_PARAM_META_KEY, restController.prototype, key.toString());
+      const pathParams = Reflect.getOwnMetadata(PATH_PARAM_META_KEY, restController.prototype, key.toString());
+      const headerParams = Reflect.getOwnMetadata(HEADER_PARAM_META_KEY, restController.prototype, key.toString());
+      const bodyIndex = Reflect.getOwnMetadata(BODY_META_KEY, restController.prototype, key.toString());
+      const requestIndex = Reflect.getOwnMetadata(BODY_META_KEY, restController.prototype, key.toString());
+
+      let builder = new RestBuilder().method(method);
+      let mapping: string[] = [];
+      if (path)
+        builder.path(restPath + path);
+      if (queryParams) {
+        for (let key in queryParams) {
+          let queryParam = queryParams[key];
+          builder.param('query', key, queryParam.optionnal, queryParam.index);
+        }
+        if (pathParams) {
+          for (let key in pathParams) {
+            let index = pathParams[key];
+            builder.param('path', key, false, index);
+          }
+        }
+        if (bodyIndex) {
+          builder.body(bodyIndex);
+        }
+        if (requestIndex) {
+          builder.context(requestIndex);
+        }
+        builder.handler(instance[key]).secure(false).context(instance).build();
+      }
+    }
+  }
+  fetch(method: string, path: string, handler: Function) {
+    switch (method) {
+      case 'POST':
+      case 'post':
+        return this.post(path, handler);
+      case 'PUT':
+      case 'put':
+        return this.put(path, handler);
+      case 'DELETE':
+      case 'delete':
+        return this.delete(path, handler);
+      case 'GET':
+      case 'get':
+      default:
+        return this.get(path, handler);
+    }
   }
   get(path: string, handler: Function) {
     logger.debug('REST register method: GET, path:', path);

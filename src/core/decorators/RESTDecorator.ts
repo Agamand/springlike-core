@@ -1,4 +1,4 @@
-import { PATH_PARAM_META_KEY, QUERY_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, METHOD_META_KEY, PATH_META_KEY } from "../Constant";
+import { PATH_PARAM_META_KEY, QUERY_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, METHOD_META_KEY, PATH_META_KEY, RESTCONTROLLER_META_KEY, REQUEST_META_KEY } from "../Constant";
 
 
 export function PathParam(key: string) {
@@ -9,11 +9,11 @@ export function PathParam(key: string) {
     Reflect.defineMetadata(PATH_PARAM_META_KEY, current, target, propertyKey);
   }
 }
-export function QueryParam(key: string) {
-  return function (target: Object, propertyKey: string | symbol, parameterIndex: number) {
+export function QueryParam(key: string, optionnal: boolean = false) {
+  return function (target: Object, propertyKey: string | symbol, index: number) {
 
     const current = Reflect.getOwnMetadata(QUERY_PARAM_META_KEY, target, propertyKey) || {};
-    current[key] = parameterIndex
+    current[key] = { index, optionnal }
     Reflect.defineMetadata(QUERY_PARAM_META_KEY, current, target, propertyKey);
   }
 } export function HeaderParam(key: string, value: Function = (value: any) => { return value; }) {
@@ -26,6 +26,10 @@ export function QueryParam(key: string) {
 }
 export function Body(target: Object, propertyKey: string | symbol, parameterIndex: number) {
   Reflect.defineMetadata(BODY_META_KEY, parameterIndex, target, propertyKey);
+}
+
+export function Request(target: Object, propertyKey: string | symbol, parameterIndex: number) {
+  Reflect.defineMetadata(REQUEST_META_KEY, parameterIndex, target, propertyKey);
 }
 
 export function AuthBearer() {
@@ -48,6 +52,7 @@ export const Path = function (path: string) {
   return function (...args: Array<any>) {
     if (typeof args[0] == "function") {
       const clazz: Function = args[0];
+      Reflect.defineMetadata(PATH_META_KEY, path, clazz.prototype);
     } else {
       const target: any = args[0], key: string = args[1], descriptor: PropertyDescriptor = args[2];
       Reflect.defineMetadata(PATH_META_KEY, path, target, key);
@@ -56,5 +61,5 @@ export const Path = function (path: string) {
 }
 
 export const RestController = function (clazz: Function) {
-  //overload ctor and inject rest endpoint
+  Reflect.defineMetadata(RESTCONTROLLER_META_KEY, true, clazz.prototype);
 }

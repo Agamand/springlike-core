@@ -7,7 +7,7 @@ export class ArchiveUtils {
   }
   public static getArchive(path: string): Zip {
     var ext: string = ArchiveUtils.getExt(path);
-    if (ext in ArchiveUtils) {
+    if (ext in ArchiveUtils.type) {
       let descriptor: ArchiveDescriptor = ArchiveUtils.type[ext];
       return descriptor.getArchive(path);
     } else {
