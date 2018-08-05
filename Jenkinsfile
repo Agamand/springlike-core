@@ -3,7 +3,7 @@ pipeline {
     options {
       buildDiscarder(logRotator(numToKeepStr: '6', artifactNumToKeepStr: '6'))
     }
-    stages {      
+    stages {
       stage('prepare'){
         agent {
             docker {
@@ -29,7 +29,9 @@ pipeline {
             }
           }
           steps {
-              sh 'npm install && npm run build'
+              script{
+                npm.build();
+              }
           }
       }
       stage('Package') {
@@ -40,7 +42,9 @@ pipeline {
             }
           }
           steps {
-              sh 'npm pack'
+              script{
+                npm.pack();
+              }
           }
       }
       stage('Deploy') {
@@ -49,7 +53,7 @@ pipeline {
               branch 'master'
               branch 'develop'
             } 
-          }
+          } 
           agent {
             docker {
                 image 'node:10.1-alpine'
@@ -57,13 +61,9 @@ pipeline {
             }
           }
           steps {
-            sh '''
-              echo //npm.agamand.com/:_password="$NPM_PASSWORD" >> ~/.npmrc
-              echo //npm.agamand.com/:username=$NPM_USERNAME >> ~/.npmrc
-              echo //npm.agamand.com/:email=$NPM_EMAIL >> ~/.npmrc
-              echo //npm.agamand.com/:always-auth=true >> ~/.npmrc
-              npm publish -f
-            '''
+            script{
+              npm.publish();
+            }
           }
       }
     }
