@@ -56,13 +56,13 @@ const getParams = function (requestParam: any, params: Param, functionParams: st
     result[mappingKey] = requestParam.path[key];
   }
   //map body
-  if (params.body) {
+  if (undefined !== params.body && null !== params.body) {
     let bodyParam = params.body;
     let mappingKey: number = typeof bodyParam == 'number' ? bodyParam : functionParamsMap[bodyParam];
     result[mappingKey] = requestParam.body;
   }
   //map context
-  if (params.context) {
+  if (undefined !== params.context && null !== params.context) {
     let contextParam = params.context;
     let mappingKey: number = typeof contextParam == 'number' ? contextParam : functionParamsMap[contextParam];
     result[mappingKey] = requestParam.context;
@@ -81,7 +81,10 @@ const wrapHandler = function (handler: Function, params: Param, context: any, se
       return;
     }
     let requestParam = {
-      context: req,
+      context: {
+        request: req,
+        response: res
+      },
       path: req.params || {},
       query: req.query || {},
       body: req.body || null

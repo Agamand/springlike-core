@@ -78,7 +78,7 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
             }
           }
         }
-        if (bodyIndex) {
+        if (undefined != bodyIndex && null != bodyIndex) {
           let value = args[bodyIndex]
           if (undefined !== value)
             requestBuilder.body(args[bodyIndex])

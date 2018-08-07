@@ -1,4 +1,4 @@
-import { PATH_PARAM_META_KEY, QUERY_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, METHOD_META_KEY, PATH_META_KEY, RESTCONTROLLER_META_KEY, REQUEST_META_KEY } from "../Constant";
+import { PATH_PARAM_META_KEY, QUERY_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, METHOD_META_KEY, PATH_META_KEY, RESTCONTROLLER_META_KEY, CONTEXT_META_KEY } from "../Constant";
 
 
 export function PathParam(key: string) {
@@ -28,8 +28,8 @@ export function Body(target: Object, propertyKey: string | symbol, parameterInde
   Reflect.defineMetadata(BODY_META_KEY, parameterIndex, target, propertyKey);
 }
 
-export function Request(target: Object, propertyKey: string | symbol, parameterIndex: number) {
-  Reflect.defineMetadata(REQUEST_META_KEY, parameterIndex, target, propertyKey);
+export function Context(target: Object, propertyKey: string | symbol, parameterIndex: number) {
+  Reflect.defineMetadata(CONTEXT_META_KEY, parameterIndex, target, propertyKey);
 }
 
 export function AuthBearer() {

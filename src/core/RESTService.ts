@@ -2,12 +2,13 @@
 import express, {
   Express
 } from 'express';
+import cookieSession from 'cookie-session'
 import bodyParser from 'body-parser';
 import ConfigMgr from './ConfigMgr';
 import { Server } from 'http';
 import Utils from './Utils';
 import { RestBuilder } from './RESTBuilder';
-import { logger, RESTCONTROLLER_META_KEY, METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY } from './Constant';
+import { logger, RESTCONTROLLER_META_KEY, METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, CONTEXT_META_KEY } from './Constant';
 import { AsService } from './decorators';
 //import { registerRestPoint } from './RESTUtils';
 const collection = 'cache';
@@ -20,6 +21,12 @@ export default class RESTService {
   private tokens: any;
   constructor() {
     this.app = express();
+    this.app.use(cookieSession({
+      name: 'aga-session',
+      keys: ['coucou'],
+      // Cookie Options
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }))
     this.app.use(bodyParser.json())
     this.server = this.app.listen(this.getPort(), function () { })
     this.tokens = {};
@@ -74,7 +81,7 @@ export default class RESTService {
       const pathParams = Reflect.getOwnMetadata(PATH_PARAM_META_KEY, restController.prototype, key.toString());
       const headerParams = Reflect.getOwnMetadata(HEADER_PARAM_META_KEY, restController.prototype, key.toString());
       const bodyIndex = Reflect.getOwnMetadata(BODY_META_KEY, restController.prototype, key.toString());
-      const requestIndex = Reflect.getOwnMetadata(BODY_META_KEY, restController.prototype, key.toString());
+      const contextIndex = Reflect.getOwnMetadata(CONTEXT_META_KEY, restController.prototype, key.toString());
 
       let builder = new RestBuilder().method(method);
       let mapping: string[] = [];
@@ -85,20 +92,20 @@ export default class RESTService {
           let queryParam = queryParams[key];
           builder.param('query', key, queryParam.optionnal, queryParam.index);
         }
-        if (pathParams) {
-          for (let key in pathParams) {
-            let index = pathParams[key];
-            builder.param('path', key, false, index);
-          }
-        }
-        if (bodyIndex) {
-          builder.body(bodyIndex);
-        }
-        if (requestIndex) {
-          builder.context(requestIndex);
-        }
-        builder.handler(instance[key]).secure(false).context(instance).build();
       }
+      if (pathParams) {
+        for (let key in pathParams) {
+          let index = pathParams[key];
+          builder.param('path', key, false, index);
+        }
+      }
+      if (undefined != bodyIndex && null != bodyIndex) {
+        builder.body(bodyIndex);
+      }
+      if (undefined != contextIndex && null != contextIndex) {
+        builder.contextParam(contextIndex);
+      }
+      builder.handler(instance[key]).secure(false).context(instance).build();
     }
   }
   fetch(method: string, path: string, handler: Function) {
