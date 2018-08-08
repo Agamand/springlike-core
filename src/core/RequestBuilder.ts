@@ -30,7 +30,7 @@ export class RequestBuilder {
     return this;
   }
   method(method: string): RequestBuilder {
-    this._method = method;
+    this._method = method.toUpperCase();
     return this;
   }
   secure(secure: boolean): RequestBuilder {
