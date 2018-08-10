@@ -3,22 +3,31 @@ import { PATH_PARAM_META_KEY, QUERY_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_
 
 export function PathParam(key: string) {
   return function (target: Object, propertyKey: string | symbol, index?: number) {
-
+    if (undefined == index) {
+      Object.defineProperty(target, propertyKey, { writable: true});
+      return Reflect.defineMetadata(PATH_PARAM_META_KEY, { key }, target, propertyKey);
+    }
     const current = Reflect.getOwnMetadata(PATH_PARAM_META_KEY, target, propertyKey) || {};
-    current[key] = index || undefined
+    current[key] = { index }
     Reflect.defineMetadata(PATH_PARAM_META_KEY, current, target, propertyKey);
   }
 }
 export function QueryParam(key: string, optionnal: boolean = false) {
   return function (target: Object, propertyKey: string | symbol, index?: number) {
-
+    if (undefined == index) {
+      Object.defineProperty(target, propertyKey, { writable: true});
+      return Reflect.defineMetadata(QUERY_PARAM_META_KEY, { key, optionnal }, target, propertyKey);
+    }
     const current = Reflect.getOwnMetadata(QUERY_PARAM_META_KEY, target, propertyKey) || {};
     current[key] = { index, optionnal }
     Reflect.defineMetadata(QUERY_PARAM_META_KEY, current, target, propertyKey);
   }
 } export function HeaderParam(key: string, value: Function = (value: any) => { return value; }) {
   return function (target: Object, propertyKey: string | symbol, index?: number) {
-
+    if (undefined == index) {
+      Object.defineProperty(target, propertyKey, { writable: true});
+      return Reflect.defineMetadata(QUERY_PARAM_META_KEY, { key, evaluate: value }, target, propertyKey);
+    }
     const current = Reflect.getOwnMetadata(HEADER_PARAM_META_KEY, target, propertyKey) || {};
     current[key] = { index, evaluate: value };
     Reflect.defineMetadata(HEADER_PARAM_META_KEY, current, target, propertyKey);

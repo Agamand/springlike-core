@@ -66,8 +66,8 @@ export default class RESTService {
       }
     })
   }
-  loadRestController(restController: FunctionConstructor) {
-    let instance: any = new restController();
+  loadRestController(restController: Function) {
+    let instance: any = new (<FunctionConstructor>restController)();
 
     let props = Object.getOwnPropertyNames(restController.prototype);
 
@@ -95,8 +95,8 @@ export default class RESTService {
       }
       if (pathParams) {
         for (let key in pathParams) {
-          let index = pathParams[key];
-          builder.param('path', key, false, index);
+          let pathParam = pathParams[key];
+          builder.param('path', key, false, pathParam.index);
         }
       }
       if (undefined != bodyIndex && null != bodyIndex) {
@@ -169,6 +169,11 @@ export default class RESTService {
     return new RestBuilder();
   }
   createURL(path: string) {
+    let protocol = this.getProtocol(),
+      host = this.getHost(),
+      port = this.getPublicPort();
+    port = protocol == 'http' && port == 80 || protocol == 'https' && port == 443 ? "" : ":" + port;
 
+    return `${protocol}://${host}${port}${path}`
   }
 }
