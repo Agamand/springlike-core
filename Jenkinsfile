@@ -43,8 +43,8 @@ pipeline {
           }
           steps {
               script{
-                npm.test();
-                npm.coverage();
+                //npm.test();
+                //npm.coverage();
               }
           }
       }
@@ -85,8 +85,8 @@ pipeline {
       always {
           archiveArtifacts artifacts:'*.tgz'
           publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'docs', reportFiles: 'index.html', reportName: 'Docs', reportTitles: ''])
-          junit allowEmptyResults: true, testResults: 'test-results.xml'
-          cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage/*.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
+          //junit allowEmptyResults: true, testResults: 'test-results.xml'
+          //cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage/*.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
       }
     }
 }
