@@ -8,7 +8,7 @@ import ConfigMgr from './ConfigMgr';
 import { Server } from 'http';
 import Utils from './Utils';
 import { RestBuilder } from './RESTBuilder';
-import { logger, RESTCONTROLLER_META_KEY, METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, CONTEXT_META_KEY } from './Constant';
+import { LOGGER, RESTCONTROLLER_META_KEY, METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, CONTEXT_META_KEY, SUCCESS_CODE_META_KEY } from './Constant';
 import { AsService } from './decorators';
 //import { registerRestPoint } from './RESTUtils';
 const collection = 'cache';
@@ -77,6 +77,7 @@ export default class RESTService {
       if (!method)
         continue;
       const path = Reflect.getOwnMetadata(PATH_META_KEY, restController.prototype, key.toString());
+      const successCode = Reflect.getOwnMetadata(SUCCESS_CODE_META_KEY, restController.prototype, key.toString());
       const queryParams = Reflect.getOwnMetadata(QUERY_PARAM_META_KEY, restController.prototype, key.toString());
       const pathParams = Reflect.getOwnMetadata(PATH_PARAM_META_KEY, restController.prototype, key.toString());
       const headerParams = Reflect.getOwnMetadata(HEADER_PARAM_META_KEY, restController.prototype, key.toString());
@@ -105,6 +106,8 @@ export default class RESTService {
       if (undefined != contextIndex && null != contextIndex) {
         builder.contextParam(contextIndex);
       }
+      if (undefined != successCode)
+        builder.successCode(successCode);
       builder.handler(instance[key]).secure(false).context(instance).build();
     }
   }
@@ -126,30 +129,30 @@ export default class RESTService {
     }
   }
   get(path: string, handler: Function) {
-    logger.debug('REST register method: GET, path:', path);
+    LOGGER.debug('REST register method: GET, path:', path);
     this.app.get(path, (...args: Array<any>) => {
-      logger.debug('REST call method: GET path:', path);
+      LOGGER.debug('REST call method: GET path:', path);
       return handler.apply(null, args);
     });
   }
   post(path: string, handler: Function) {
-    logger.debug('REST register method: POST, path:', path);
+    LOGGER.debug('REST register method: POST, path:', path);
     this.app.post(path, (...args: Array<any>) => {
-      logger.debug('REST call method: POST, path:', path);
+      LOGGER.debug('REST call method: POST, path:', path);
       return handler.apply(null, args);
     });
   }
   put(path: string, handler: Function) {
-    logger.debug('REST register method: PUT, path:', path);
+    LOGGER.debug('REST register method: PUT, path:', path);
     this.app.put(path, (...args: Array<any>) => {
-      logger.debug('REST call method: PUT, path:', path);
+      LOGGER.debug('REST call method: PUT, path:', path);
       return handler.apply(null, args);
     });
   }
   delete(path: string, handler: Function) {
-    logger.debug('REST register method: DELETE, path:', path);
+    LOGGER.debug('REST register method: DELETE, path:', path);
     this.app.delete(path, (...args: Array<any>) => {
-      logger.debug('REST call method: DELETE, path:', path);
+      LOGGER.debug('REST call method: DELETE, path:', path);
       return handler.apply(null, args);
     });
   }

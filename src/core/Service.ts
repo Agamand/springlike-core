@@ -4,7 +4,7 @@ import fs from 'fs';
 import Utils from './Utils';
 import "reflect-metadata";
 import RemoteService from './RemoteService';
-import { logger } from './Constant';
+import { LOGGER } from './Constant';
 
 const appDir = path.dirname(require.main.filename);
 export class ServiceRegistry {
@@ -16,7 +16,7 @@ export class ServiceRegistry {
     })
   }
   register(clazz: Function) {
-    logger.info('load service :', clazz.name);
+    LOGGER.info('load service :', clazz.name);
     this.services[clazz.name] = clazz
   }
   getClass<T extends Function=Function>(className: string): T {
@@ -42,10 +42,10 @@ export class ServiceRegistry {
 
     let instance = null;
     if (this.services[className].allowRemote && remoteConf.enable && !serviceConf[className]) {
-      logger.debug('Instanciate remote', className);
+      LOGGER.debug('Instanciate remote', className);
       instance = Remote(className);
     } else {
-      logger.debug('Instanciate', className);
+      LOGGER.debug('Instanciate', className);
       instance = new this.services[className]();
 
     }
@@ -57,7 +57,7 @@ export class ServiceRegistry {
       service2Preload[key] = true;
     }
 
-    logger.debug('Preload services');
+    LOGGER.debug('Preload services');
     for (let serviceKey in this.services) {
       let service = this.services[serviceKey];
       if (service.preload || service2Preload[serviceKey])

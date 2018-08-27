@@ -1,5 +1,5 @@
 import { MongoClient, Db, Collection, MongoError } from 'mongodb';
-import { logger } from '../../core/Constant';
+import { LOGGER } from '../../core/Constant';
 import { DBCursor } from '../DataService';
 
 export default class MongoDBImpl {

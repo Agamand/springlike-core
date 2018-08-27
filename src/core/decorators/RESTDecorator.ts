@@ -1,10 +1,10 @@
-import { PATH_PARAM_META_KEY, QUERY_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, METHOD_META_KEY, PATH_META_KEY, RESTCONTROLLER_META_KEY, CONTEXT_META_KEY } from "../Constant";
+import { PATH_PARAM_META_KEY, QUERY_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, METHOD_META_KEY, PATH_META_KEY, RESTCONTROLLER_META_KEY, CONTEXT_META_KEY, SUCCESS_CODE_META_KEY } from "../Constant";
 
 
 export function PathParam(key: string) {
   return function (target: Object, propertyKey: string | symbol, index?: number) {
     if (undefined == index) {
-      Object.defineProperty(target, propertyKey, { writable: true});
+      Object.defineProperty(target, propertyKey, { writable: true });
       return Reflect.defineMetadata(PATH_PARAM_META_KEY, { key }, target, propertyKey);
     }
     const current = Reflect.getOwnMetadata(PATH_PARAM_META_KEY, target, propertyKey) || {};
@@ -15,7 +15,7 @@ export function PathParam(key: string) {
 export function QueryParam(key: string, optionnal: boolean = false) {
   return function (target: Object, propertyKey: string | symbol, index?: number) {
     if (undefined == index) {
-      Object.defineProperty(target, propertyKey, { writable: true});
+      Object.defineProperty(target, propertyKey, { writable: true });
       return Reflect.defineMetadata(QUERY_PARAM_META_KEY, { key, optionnal }, target, propertyKey);
     }
     const current = Reflect.getOwnMetadata(QUERY_PARAM_META_KEY, target, propertyKey) || {};
@@ -25,7 +25,7 @@ export function QueryParam(key: string, optionnal: boolean = false) {
 } export function HeaderParam(key: string, value: Function = (value: any) => { return value; }) {
   return function (target: Object, propertyKey: string | symbol, index?: number) {
     if (undefined == index) {
-      Object.defineProperty(target, propertyKey, { writable: true});
+      Object.defineProperty(target, propertyKey, { writable: true });
       return Reflect.defineMetadata(QUERY_PARAM_META_KEY, { key, evaluate: value }, target, propertyKey);
     }
     const current = Reflect.getOwnMetadata(HEADER_PARAM_META_KEY, target, propertyKey) || {};
@@ -50,6 +50,12 @@ export const Method = function (method: string) {
     Reflect.defineMetadata(METHOD_META_KEY, method, target, key);
   }
 }
+export const SuccessCode = function (code: number = 200) {
+  return function (target: any, key: string, descriptor: PropertyDescriptor) {
+    Reflect.defineMetadata(SUCCESS_CODE_META_KEY, code, target, key);
+  }
+}
+
 export const GET = Method('GET');
 export const POST = Method('POST');
 export const PUT = Method('PUT');

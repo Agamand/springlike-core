@@ -10,6 +10,7 @@ export class RequestBuilder {
   _handler: Function = function () { };
   _params: any = {};
   _context: any = null;
+  _successCode: number = 200;
   constructor() {
   }
   protocol(protocol: string): RequestBuilder {
@@ -35,6 +36,10 @@ export class RequestBuilder {
   }
   secure(secure: boolean): RequestBuilder {
     this._secure = secure;
+    return this;
+  }
+  successCode(successCode: number) {
+    this._successCode = successCode;
     return this;
   }
   handler(handler: Function): RequestBuilder {
@@ -89,7 +94,7 @@ export class RequestBuilder {
           if (error) {
             return reject(error);
           }
-          if (200 != response.statusCode) {
+          if (me._successCode != response.statusCode) {
             return reject(new Error('got a ' + response.statusCode + ' status code'));
           }
           resolve(response);

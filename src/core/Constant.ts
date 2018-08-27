@@ -1,4 +1,5 @@
 import log4js from 'log4js';
+import { EventEmitter } from "events";
 export const PATH_PARAM_META_KEY = Symbol("rest:pathParam");
 export const QUERY_PARAM_META_KEY = Symbol("rest:queryParam");
 export const HEADER_PARAM_META_KEY = Symbol("rest:headerParam");
@@ -6,6 +7,8 @@ export const BODY_META_KEY = Symbol("rest:body");
 export const RESPONSE_META_KEY = Symbol("rest:response");
 export const CONTEXT_META_KEY = Symbol("rest:request");
 export const METHOD_META_KEY = Symbol("rest:method");
+export const SUCCESS_CODE_META_KEY = Symbol("rest:successCode");
 export const PATH_META_KEY = Symbol("rest:path");
 export const RESTCONTROLLER_META_KEY = Symbol("rest:controller");
-export const logger = log4js.getLogger();
+export const LOGGER = log4js.getLogger();
+export const GlobalEmitter = new EventEmitter();

@@ -18,7 +18,8 @@ export default class Utils {
     return ((+value) / 10000000 - 11644473600) * 1000
   }
   public static formatDate(timestamp: string | number): string {
-    var date = new Date(+timestamp);
+    isNaN
+    var date = isNaN(+timestamp) ? new Date(timestamp) : new Date(+timestamp);
     return moment(date).utc().format("DD/MM/YY, HH:mm [EVETIME]")
   }
   public static loadFiles(regexp: string | RegExp, baseFolder: string): Array<Object> {

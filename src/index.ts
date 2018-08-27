@@ -7,6 +7,8 @@ export { default as RemoteService } from './core/RemoteService';
 export { ArchiveUtils, Zip } from './core/ArchiveUtils';
 export { default as Service } from './core/Service';
 export { default as RESTService } from './core/RESTService';
+export * from './core/Registry';
+export * from './core/GenericConstructor';
 export * from './core/RESTBuilder';
 export * from './core/RequestBuilder';
 export * from './core/RESTUtils'

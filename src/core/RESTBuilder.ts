@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import { logger } from './Constant';
+import { LOGGER } from './Constant';
 import Service from './Service';
 import Utils from './Utils';
 import Path from 'path';
@@ -11,7 +11,7 @@ const validateQuery = function (requestParam: any, params: Param) {
     let param = params.query[key];
     //if a query or path param and there no value
     if (!(key in requestParam.query) && !param.optionnal) {
-      logger.debug(key, "query", 'not found');
+      LOGGER.debug(key, "query", 'not found');
       return false;
     }
 
@@ -20,13 +20,13 @@ const validateQuery = function (requestParam: any, params: Param) {
     let param = params.path[key];
     //if a path param and there no value
     if (!(key in requestParam.path) && !param.optionnal) {
-      logger.debug(key, "path", 'not found');
+      LOGGER.debug(key, "path", 'not found');
       return false;
     }
 
   }
   if (params.body && !requestParam.body) {
-    logger.debug('body is required');
+    LOGGER.debug('body is required');
     return false;
   }
   return true;
@@ -72,37 +72,41 @@ const getParams = function (requestParam: any, params: Param, functionParams: st
   return result;
 }
 
-const wrapHandler = function (handler: Function, params: Param, context: any, secure: boolean) {
+const wrapHandler = function (builder: RestBuilder) {
   const rest: any = Service.get('RESTService')
   return function (req: Request, res: Response) {
     let query = req && req.query || {};
-    if (secure && !rest.isAllowedToken(query.token)) {
+    if (builder._secure && !rest.isAllowedToken(query.token)) {
       res.status(403).end();
       return;
     }
     let requestParam = {
       context: {
         request: req,
-        response: res
+        response: res,
+        status: builder._successCode,
+        redirect: (url: string) => {
+          requestParam.context.status = 301
+          res.setHeader('Location', url)
+        }
       },
       path: req.params || {},
       query: req.query || {},
       body: req.body || null
     }
-    if (!validateQuery(requestParam, params)) {
-
-      logger.debug('query not valid');
+    if (!validateQuery(requestParam, builder._params)) {
+      LOGGER.debug('query not valid');
       res.status(400).end();
       return;
     }
-    let functionParams = Utils.getFunctionParams(handler) || [];
-    let result = handler.apply(context, getParams(requestParam, params, functionParams));
+    let functionParams = Utils.getFunctionParams(builder._handler) || [];
+    let result = builder._handler.apply(builder._context, getParams(requestParam, builder._params, functionParams));
     if (!(result instanceof Promise)) {
       result = Promise.resolve(result);
     }
     result.then((data: any) => {
       if (null === data) {
-        logger.debug('no data');
+        LOGGER.debug('no data');
         res.status(404).end();
         return;
       }
@@ -110,9 +114,12 @@ const wrapHandler = function (handler: Function, params: Param, context: any, se
         data = Renderer[query.format](data);
         res.type(Renderer[query.format].contentType);
       }
-      res.send(data);
+      res.status(requestParam.context.status)
+      if (data)
+        res.send(data);
+      else res.end();
     }).catch((e: Error) => {
-      logger.error("REST Call got an error :", e)
+      LOGGER.error("REST Call got an error :", e)
       res.status(500).end();
     });
   }
@@ -155,7 +162,7 @@ export class RestBuilder {
   _handler: Function = function () { };
   _params: Param = { query: {}, path: {} };
   _context: any = null;
-  _mapping: string[] = null;
+  _successCode: number = 200;
   constructor() {
   }
   path(path: string): RestBuilder {
@@ -196,11 +203,15 @@ export class RestBuilder {
     this._context = context;
     return this;
   }
+  successCode(successCode: number) {
+    this._successCode = successCode;
+    return this;
+  }
   build(): void {
     const rest: any = Service.get('RESTService')
 
 
-    let handler = wrapHandler(this._handler, this._params, this._context, this._secure);
+    let handler = wrapHandler(this);
     rest.fetch(this._method, this._path, handler);
   }
 }

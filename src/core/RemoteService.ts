@@ -2,7 +2,7 @@ import RESTService from "./RESTService";
 import ConfigMgr from "./ConfigMgr";
 import request, { Response } from 'request';
 import Utils from "./Utils";
-import { logger } from "./Constant";
+import { LOGGER } from "./Constant";
 import Service from "./Service";
 import { AsService, AutoService } from "./decorators";
 
@@ -80,7 +80,7 @@ export default class RemoteService {
   getRemoteService(serviceName: string) {
     return new Promise((resolve, reject) => {
       let url = this.createURL(`/services/${serviceName}`, this.remoteConfig);
-      logger.debug('getRemoteService', serviceName, url);
+      LOGGER.debug('getRemoteService', serviceName, url);
       request({
         method: 'GET',
         url: url,
@@ -98,7 +98,7 @@ export default class RemoteService {
   registerRemoteService(serviceName: string) {
     return new Promise((resolve, reject) => {
       let url = this.createURL(`/services/${serviceName}`, this.remoteConfig);
-      logger.debug('registerRemoteService', serviceName, url);
+      LOGGER.debug('registerRemoteService', serviceName, url);
       request({
         method: 'POST',
         url: url,
@@ -124,7 +124,7 @@ export default class RemoteService {
 
   callService(serviceName: string, functionName: string, data: any) {
 
-    logger.debug('callService', serviceName, functionName, data);
+    LOGGER.debug('callService', serviceName, functionName, data);
     let serviceClass: any = Service.getClass(serviceName);
     if (!serviceClass.allowRemote)
       return null;
@@ -137,7 +137,7 @@ export default class RemoteService {
   callRemoteService(serviceName: string, serviceInfo: any, functionName: string, data: any) {
     return new Promise((resolve, reject) => {
       let url = this.createURL(`/services/${serviceName}/${functionName}`, serviceInfo);
-      logger.debug('callRemoteService', serviceName, functionName, data, url);
+      LOGGER.debug('callRemoteService', serviceName, functionName, data, url);
       request({
         method: 'POST',
         url: url,

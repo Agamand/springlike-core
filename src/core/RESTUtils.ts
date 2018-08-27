@@ -1,7 +1,7 @@
 import CacheService from "./CacheService";
 import { URL } from "url";
 import Service from "./Service";
-import { METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, logger } from "./Constant";
+import { METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, LOGGER, SUCCESS_CODE_META_KEY } from "./Constant";
 import { RequestBuilder } from "./RequestBuilder";
 import request from 'request';
 
@@ -70,6 +70,7 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
 
 
       const path = Reflect.getOwnMetadata(PATH_META_KEY, clazz.prototype, key.toString()) || '/';
+      const successCode = Reflect.getOwnMetadata(SUCCESS_CODE_META_KEY, clazz.prototype, key.toString());
       const queryParam = Reflect.getOwnMetadata(QUERY_PARAM_META_KEY, clazz.prototype, key.toString());
       const pathParam = Reflect.getOwnMetadata(PATH_PARAM_META_KEY, clazz.prototype, key.toString());
       const headerParam = Reflect.getOwnMetadata(HEADER_PARAM_META_KEY, clazz.prototype, key.toString());
@@ -86,7 +87,7 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
           try {
             return await cacheService.get(cacheKey);
           } catch (e) {
-            logger.debug(e.toString())
+            LOGGER.debug(e.toString())
           }
         }
 
@@ -132,6 +133,8 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
           if (undefined !== value)
             requestBuilder.body(args[bodyIndex])
         }
+        if (undefined != successCode)
+          requestBuilder.successCode(successCode);
         injectClassArgument(requestBuilder, target, injectedParam, queryParamClazz, pathParamClazz, headerParamClazz);
 
         let response: request.Response = await requestBuilder.build()();

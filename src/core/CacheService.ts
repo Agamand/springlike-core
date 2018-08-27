@@ -1,5 +1,5 @@
 import DataService from '../database/DataService';
-import { logger } from './Constant';
+import { LOGGER } from './Constant';
 import { AsService, AutoService } from './decorators';
 
 const collection = 'cache';
@@ -14,12 +14,12 @@ export default class CacheService {
   constructor() {
     this.cleaner = setInterval(() => {
       this.cleanCache().then((count: number) => {
-        logger.debug('%s elements has been remove from cache', count);
+        LOGGER.debug('%s elements has been remove from cache', count);
       })
     }, 60000);
   }
   async get(key: string): Promise<any> {
-    logger.debug('trying to get cache', key);
+    LOGGER.debug('trying to get cache', key);
     return this.dataService.findOne(collection, {
       _id: key
     }).then((data: any) => {
@@ -29,13 +29,13 @@ export default class CacheService {
         return Promise.reject(new Error('There is no data cached for the key : ' + key));
       }
 
-      logger.debug('cache from key:', key, 'expireDate:', data.expireDate);
+      LOGGER.debug('cache from key:', key, 'expireDate:', data.expireDate);
 
       if ((+currentDate - +data.expireDate) >= 0) {
-        logger.debug('cache from key:', key, 'is outdated');
+        LOGGER.debug('cache from key:', key, 'is outdated');
         return Promise.reject(new Error('Data expired'));
       }
-      logger.debug('cache from key:', key, 'is ok');
+      LOGGER.debug('cache from key:', key, 'is ok');
       return data.data;
     });
   }
@@ -64,7 +64,7 @@ export default class CacheService {
         }
       }
     }
-    logger.debug('clean cache', filter);
+    LOGGER.debug('clean cache', filter);
     return this.dataService.remove(collection, filter);
   }
 }
