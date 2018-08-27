@@ -34,20 +34,20 @@ pipeline {
               }
           }
       }
-      stage('Tests') {
-          agent {
-            docker {
-                image 'node:10.1-alpine'
-                reuseNode true
-            }
-          }
-          steps {
-              script{
-                //npm.test();
-                //npm.coverage();
-              }
-          }
-      }
+      // stage('Tests') {
+      //     agent {
+      //       docker {
+      //           image 'node:10.1-alpine'
+      //           reuseNode true
+      //       }
+      //     }
+      //     steps {
+      //         script{
+      //           npm.test();
+      //           npm.coverage();
+      //         }
+      //     }
+      // }
       stage('Package') {
           agent {
             docker {
