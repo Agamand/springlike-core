@@ -38,7 +38,6 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
   const pathParamClazz: any = {}
   const headerParamClazz: any = {};
   let propDescriptors = Object.getOwnPropertyDescriptors(clazz.prototype);
-  console.log(propDescriptors);
   for (let key in propDescriptors) {
 
     if (propDescriptors[key].value && "function" == typeof propDescriptors[key].value)
@@ -60,11 +59,8 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
   return new Proxy(instance, {
     get: function (target: any, key: PropertyKey) {
 
-      console.log('get', key)
       const method = Reflect.getOwnMetadata(METHOD_META_KEY, clazz.prototype, key.toString());
       if (!method || typeof target[key] != 'function') {
-        console.log('return default');
-        console.log(method, typeof target[key])
         return target[key];
       }
 
@@ -92,7 +88,7 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
         }
 
         let injectedParam = await (paramProvider && paramProvider.resolve() || Promise.resolve({}));
-        console.log('call proxied method', key, method, path)
+        LOGGER.debug('call proxied method', key, method, path)
 
         let requestBuilder = new RequestBuilder();
         requestBuilder.host(url.hostname);

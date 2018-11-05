@@ -1,6 +1,7 @@
 import request from 'request';
 import Path from 'path';
 import { Stream } from 'stream';
+import { LOGGER } from './Constant';
 export class RequestBuilder {
   _host: string = 'localhost';
   _protocol: string = 'http'
@@ -83,7 +84,7 @@ export class RequestBuilder {
     return async function (): Promise<request.Response> {
       return new Promise<request.Response>((resolve: Function, reject: Function) => {
         const url = `${me._protocol}://${me._host}${me.computePath()}`;
-        console.log('call request on ', url, me._host, me._path);
+        LOGGER.debug('call request on ', url, me._host, me._path);
 
         // request({
         //   method: me._method,
