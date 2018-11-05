@@ -8,7 +8,7 @@ export function AsService(clazz: Function) {
 
 export function AutoService(serviceNameOrTarget?: any, key?: string): any {
   const apply = function (target: any, key: string): any {
-    const type = Reflect.getMetadata("design:type", target, key);;
+    const type = Reflect.getMetadata("design:type", target, key);
     const prop = Reflect.getOwnPropertyDescriptor(target, key);
     // property getter
     var getter = function () {

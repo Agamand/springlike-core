@@ -13,4 +13,5 @@ export * from './core/RESTBuilder';
 export * from './core/RequestBuilder';
 export * from './core/RESTUtils'
 export * from './core/Service'
+export * from './core/CommonTypes'
 export * from './core/decorators'

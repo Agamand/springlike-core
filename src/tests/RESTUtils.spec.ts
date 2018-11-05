@@ -13,7 +13,7 @@ class FakeRestApi {
 
   @Path('/:b')
   @POST
-  async test(@PathParam('b') b: string, @QueryParam('c') c: string, @Body d): Promise<any> {
+  async test(@PathParam('b') b: string, @QueryParam('c') c: string, @Body d: any): Promise<any> {
 
 
   }
@@ -36,12 +36,12 @@ class toto implements IParamProvider {
 
 @suite class createClientTest {
   @test
-  async testClient(done) {
+  async testClient() {
 
     let client: FakeRestApi = createClient('http://httpbin.org', FakeRestApi, new toto());
     let data = await client.test('b', 'c', { d: 1 });
     //chai.expect(data.args.c, 'c');
     //chai.expect(data.url, 'http://httpbin.org/anything/aFromProvider/b?c=c')
-    done();
+    chai.expect(true).to.be.eq(true);
   }
 }

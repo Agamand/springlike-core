@@ -10,3 +10,4 @@ test
 .nyc_output/*
 test-*.xml
 coverage/*
+lib/tests/*

@@ -11,8 +11,8 @@
     "clean": "rimraf lib types",
     "build": "npm run clean && tsc  && npm run docs",
     "docs": "typedoc --out docs --theme minimal --mode file src",
-    "pretest": "rimraf test/lib && tsc -p test/tsconfig.json",
-    "test": "nyc --reporter=junit mocha --reporter mocha-junit-reporter test/lib/*.spec.js",
+    "test": "nyc --reporter=junit mocha --reporter mocha-junit-reporter lib/tests/*.spec.js --exit || echo Failing tests", 
+    "test:mocha": "mocha lib/tests/*.spec.js --exit || echo Failing tests",
     "coverage": "nyc report --reporter=cobertura"
   },
   "author": "Agamand <basset.cyril@gmail.com>",

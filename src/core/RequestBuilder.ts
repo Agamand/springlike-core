@@ -1,5 +1,6 @@
 import request from 'request';
 import Path from 'path';
+import { Stream } from 'stream';
 export class RequestBuilder {
   _host: string = 'localhost';
   _protocol: string = 'http'
@@ -84,21 +85,59 @@ export class RequestBuilder {
         const url = `${me._protocol}://${me._host}${me.computePath()}`;
         console.log('call request on ', url, me._host, me._path);
 
-        request({
+        // request({
+        //   method: me._method,
+        //   url: url,
+        //   headers: me._header,
+        //   body: me._params["body"] || null,
+        //   json: true
+        // }, function (error: any, response: request.Response, body: any) {
+        //   if (error) {
+        //     return reject(error);
+        //   }
+        //   if (me._successCode != response.statusCode) {
+        //     return reject(new Error('got a ' + response.statusCode + ' status code'));
+        //   }
+        //   resolve(response);
+        // })
+        let req = request({
           method: me._method,
           url: url,
           headers: me._header,
-          body: me._params["body"] || null,
-          json: true
-        }, function (error: any, response: request.Response, body: any) {
+        }).on('error', (error) => {
           if (error) {
             return reject(error);
           }
+        }).on('response', (response) => {
           if (me._successCode != response.statusCode) {
             return reject(new Error('got a ' + response.statusCode + ' status code'));
           }
-          resolve(response);
+          let buffer: any[] = [];
+          response.on('data', (chunk) => buffer.push(chunk))
+          response.on('end', () => {
+            let data = Buffer.concat(buffer).toString();
+            try {
+              response.body = JSON.parse(data);
+            } catch (e) {
+              response.body = data;
+            }
+            resolve(response);
+          })
         })
+        if (!me._params["body"]) {
+          req.write("");
+        }
+        else if (me._params["body"] instanceof Stream) {
+          me._params["body"].pipe(req);
+        }
+        else if (typeof me._params["body"] == 'object') {
+          req.write(JSON.stringify(me._params["body"]));
+        }
+        else {
+          req.write(me._params["body"]);
+        }
+
+
       });
     }
   }
