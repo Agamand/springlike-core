@@ -25,7 +25,7 @@ export function InjectService(serviceNameOrTarget?: any, key?: string): any {
     // property getter
     var getter = function (): any {
       try {
-        ServiceRegistry.get(typeName);
+        return ServiceRegistry.get(typeName);
       } catch (e) {
         if (!optional) {
            throw new Error('Unable to load service : ' + typeName)
