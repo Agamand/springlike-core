@@ -1,9 +1,13 @@
 node_modules/
-*.lastKillMail
-api.json
-token.json
+docs/
 conf/config.js
-*.lastNotification
 Jenkinsfile
 Dockerfile
 *.tgz
+tsconfig.*
+src
+test
+.nyc_output/*
+test-*.xml
+coverage/*
+lib/tests/*

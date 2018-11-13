@@ -1,23 +1,59 @@
 {
   "name": "aga-core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "typings": "types/index.d.ts",
   "scripts": {
-    "start": "node index",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run build && node lib/index",
+    "prepack": "npm run build",
+    "clean": "rimraf lib types",
+    "build": "npm run clean && tsc  && npm run docs",
+    "docs": "typedoc --out docs --theme minimal --mode file src",
+    "test": "nyc --reporter=junit mocha --reporter mocha-junit-reporter lib/tests/*.spec.js --exit || echo Failing tests", 
+    "test:mocha": "mocha lib/tests/*.spec.js --exit || echo Failing tests",
+    "coverage": "nyc report --reporter=cobertura"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Agamand <basset.cyril@gmail.com>",
+  "license": "MIT",
   "dependencies": {
+    "@types/request": "^2.47.0",
+    "adm-zip": "^0.4.11",
+    "cookie-session": "^2.0.0-beta.3",
     "express": "^4.16.2",
-    "fetch-swagger-schema": "^0.1.2",
-    "js-yaml": "^3.11.0",
-    "log4js": "^2.5.3",
+    "log4js": "^3.0.5",
     "moment": "^2.20.1",
-    "nedb": "^1.8.0"
+    "mongodb": "^3.0.10",
+    "nedb": "^1.8.0",
+    "reflect-metadata": "^0.1.12"
   },
   "publishConfig": {
     "registry": "http://npm.agamand.com"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.4.31",
+    "@types/body-parser": "^1.17.0",
+    "@types/chai": "^4.1.4",
+    "@types/chai-as-promised": "^7.1.0",
+    "@types/cookie-session": "^2.0.35",
+    "@types/express": "^4.16.0",
+    "@types/mocha": "^5.2.5",
+    "@types/mongodb": "^3.0.19",
+    "@types/nedb": "^1.8.5",
+    "@types/node": "^10.3.2",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "coveralls": "^3.0.1",
+    "i": "^0.3.6",
+    "istanbul": "^0.4.5",
+    "jenkins-mocha": "^6.0.0",
+    "junit": "^1.4.9",
+    "mocha": "^5.2.0",
+    "mocha-junit-reporter": "^1.17.0",
+    "mocha-typescript": "^1.1.16",
+    "rimraf": "^2.6.2",
+    "typedoc": "^0.12.0",
+    "typescript": "^3.0.1"
   }
 }

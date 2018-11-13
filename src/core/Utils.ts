@@ -1,22 +1,28 @@
-const path = require('path'),
-  fs = require('fs'),
-  logger = require('log4js').getLogger(),
-  appDir = path.dirname(require.main.filename),
-  crypto = require('crypto'),
-  moment = require('moment');
+import path from 'path';
+import fs from 'fs';
+import log4js from 'log4js'
+import crypto from 'crypto';
+import moment from 'moment';
+
+const appDir = path.dirname(require.main.filename),
+  logger = log4js.getLogger();
 const CONSTRUCTOR = "constructor";
 const exclude = /node_modules|\.git/
 const STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg,
   ARGUMENT_NAMES = /([^\s,]+)/g
-module.exports = {
-  ms2unix: function(value) {
+export default class Utils {
+  private constructor() {
+
+  }
+  public static ms2unix(value: string | number): number {
     return ((+value) / 10000000 - 11644473600) * 1000
-  },
-  formatDate: function(timestamp) {
-    var date = new Date(timestamp);
+  }
+  public static formatDate(timestamp: string | number): string {
+    isNaN
+    var date = isNaN(+timestamp) ? new Date(timestamp) : new Date(+timestamp);
     return moment(date).utc().format("DD/MM/YY, HH:mm [EVETIME]")
-  },
-  loadFiles(regexp, baseFolder) {
+  }
+  public static loadFiles(regexp: string | RegExp, baseFolder: string): Array<Object> {
     let root = baseFolder ? (path.isAbsolute(baseFolder) ? baseFolder : appDir + path.sep + baseFolder) : appDir;
     let folders = [root];
     if (!(regexp instanceof RegExp))
@@ -46,20 +52,19 @@ module.exports = {
       }
     }
     return result;
-  },
-  generateRandomId() {
-    var number = (new Date()).getTime();
-
+  }
+  public static generateRandomId(): string {
+    const number = (new Date()).getTime();
     return crypto.createHash('md5').update("" + number).digest("hex");
-  },
-  getFunctionParams(func) {
-    var fnStr = func.toString().replace(STRIP_COMMENTS, '');
-    var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+  }
+  public static getFunctionParams(func: Function): RegExpMatchArray {
+    let fnStr = func.toString().replace(STRIP_COMMENTS, '');
+    let result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
     if (result === null)
       result = [];
     return result;
-  },
-  getClassFunction(clazz) {
+  }
+  public static getClassFunction(clazz: any): Array<string> {
     let obj = [];
     for (let key of Object.getOwnPropertyNames(clazz.prototype)) {
       if (key != CONSTRUCTOR && typeof clazz.prototype[key] === 'function')

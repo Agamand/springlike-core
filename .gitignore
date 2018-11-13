@@ -1,8 +1,11 @@
 node_modules/
-*.lastKillMail
-api.json
-token.json
 conf/config.js
-*.lastNotification
 data/*
 logs/*
+lib
+types
+docs
+package-lock.json
+.nyc_output/*
+test-*.xml
+coverage/*
