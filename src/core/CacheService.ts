@@ -1,14 +1,16 @@
-import DataService from '../database/DataService';
+//import DataService from '../database/DataService';
 import { LOGGER } from './Constant';
-import { AsService, AutoService } from './decorators';
+import { Service, InjectService, OptionalService } from './decorators';
 
 const collection = 'cache';
 
-@AsService
+@Service
 export default class CacheService {
 
-  @AutoService
-  dataService: DataService;
+  
+  @InjectService("DataService")
+  @OptionalService
+  dataService: any;
   cleaner: NodeJS.Timer = null;
 
   constructor() {
@@ -20,26 +22,32 @@ export default class CacheService {
   }
   async get(key: string): Promise<any> {
     LOGGER.debug('trying to get cache', key);
-    return this.dataService.findOne(collection, {
+
+    if (!this.dataService)
+      throw new Error('There is no data manager')
+
+    let data = await this.dataService.findOne(collection, {
       _id: key
-    }).then((data: any) => {
-      let currentDate = new Date();
+    })
+    let currentDate = new Date();
 
-      if (!data) {
-        return Promise.reject(new Error('There is no data cached for the key : ' + key));
-      }
+    if (!data) {
+      throw new Error('There is no data cached for the key : ' + key);
+    }
 
-      LOGGER.debug('cache from key:', key, 'expireDate:', data.expireDate);
+    LOGGER.debug('cache from key:', key, 'expireDate:', data.expireDate);
 
-      if ((+currentDate - +data.expireDate) >= 0) {
-        LOGGER.debug('cache from key:', key, 'is outdated');
-        return Promise.reject(new Error('Data expired'));
-      }
-      LOGGER.debug('cache from key:', key, 'is ok');
-      return data.data;
-    });
+    if ((+currentDate - +data.expireDate) >= 0) {
+      LOGGER.debug('cache from key:', key, 'is outdated');
+      throw new Error('Data expired');
+    }
+    LOGGER.debug('cache from key:', key, 'is ok');
+    return data.data;
   }
   add(key: string, expireDate: Date, data: any) {
+    if (!this.dataService) {
+      return Promise.resolve(null);
+    }
     return this.dataService.update(collection, {
       _id: key
     }, {
@@ -54,7 +62,7 @@ export default class CacheService {
         return data;
       })
   }
-  cleanCache(all?: boolean) {
+  async cleanCache(all?: boolean): Promise<number> {
     let currentDate = new Date();
     let filter = {};
     if (!all) {
@@ -65,7 +73,9 @@ export default class CacheService {
       }
     }
     LOGGER.debug('clean cache', filter);
-    return this.dataService.remove(collection, filter);
+    if (this.dataService)
+      return this.dataService.remove(collection, filter);
+    return Promise.resolve(0);
   }
 }
 //CacheService.preload = false;

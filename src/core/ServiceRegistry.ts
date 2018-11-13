@@ -5,19 +5,22 @@ import Utils from './Utils';
 import "reflect-metadata";
 import RemoteService from './RemoteService';
 import { LOGGER } from './Constant';
+import { SMap } from '../tests';
 
 const appDir = path.dirname(require.main.filename);
-export class ServiceRegistry {
-  services: any = {}
-  instance: any = {}
+export class CServiceRegistry {
+  services: SMap<any> = {}
+  instance: SMap<any> = {}
+  localService: SMap<boolean> = {}
   load(regexp: RegExp | string, basefolder: string) {
     Utils.loadFiles(regexp, basefolder).forEach((service: Object) => {
       this.register(<Function>service);
     })
   }
-  register(clazz: Function) {
+  register(clazz: Function, local: boolean = false) {
     LOGGER.info('load service :', clazz.name);
     this.services[clazz.name] = clazz
+    this.localService[clazz.name] = local
   }
   getClass<T extends Function=Function>(className: string): T {
     if (!this.services[className]) {
@@ -67,14 +70,14 @@ export class ServiceRegistry {
 
 }
 
-const Service = new ServiceRegistry();
+const ServiceRegistry = new CServiceRegistry();
 
-export default Service;
+export default ServiceRegistry;
 
 
 let Remote = (serviceName: string) => {
-  const remoteService: RemoteService = Service.get("RemoteService")
-  let serviceClass = Service.getClass(serviceName);
+  const remoteService: RemoteService = ServiceRegistry.get("RemoteService")
+  let serviceClass = ServiceRegistry.getClass(serviceName);
   let functions = Utils.getClassFunction(serviceClass);
   return new Proxy({}, {
     get: function (obj, target) {

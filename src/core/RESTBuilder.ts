@@ -1,7 +1,7 @@
 
 import { Request, Response } from 'express';
 import { LOGGER } from './Constant';
-import Service from './Service';
+import ServiceRegistry from './ServiceRegistry';
 import Utils from './Utils';
 import Path from 'path';
 
@@ -73,7 +73,7 @@ const getParams = function (requestParam: any, params: Param, functionParams: st
 }
 
 const wrapHandler = function (builder: RestBuilder) {
-  const rest: any = Service.get('RESTService')
+  const rest: any = ServiceRegistry.get('RESTService')
   return function (req: Request, res: Response) {
     let query = req && req.query || {};
     if (builder._secure && !rest.isAllowedToken(query.token)) {
@@ -208,7 +208,7 @@ export class RestBuilder {
     return this;
   }
   build(): void {
-    const rest: any = Service.get('RESTService')
+    const rest: any = ServiceRegistry.get('RESTService')
 
 
     let handler = wrapHandler(this);

@@ -3,15 +3,15 @@ import ConfigMgr from "./ConfigMgr";
 import request, { Response } from 'request';
 import Utils from "./Utils";
 import { LOGGER } from "./Constant";
-import Service from "./Service";
-import { AsService, AutoService } from "./decorators";
+import ServiceRegistry from "./ServiceRegistry";
+import { Service, InjectService } from "./decorators";
 
 const collection = 'cache';
 
 
-@AsService
+@Service
 export default class RemoteService {
-  @AutoService
+  @InjectService
   restService: RESTService
   remoteConfig: any
   restConfig: any
@@ -116,7 +116,7 @@ export default class RemoteService {
   }
 
   getService(serviceName: string) {
-    let serviceClass: any = Service.getClass(serviceName);
+    let serviceClass: any = ServiceRegistry.getClass(serviceName);
     if (!serviceClass.allowRemote)
       return null;
     return Utils.getClassFunction(serviceClass);
@@ -125,13 +125,13 @@ export default class RemoteService {
   callService(serviceName: string, functionName: string, data: any) {
 
     LOGGER.debug('callService', serviceName, functionName, data);
-    let serviceClass: any = Service.getClass(serviceName);
+    let serviceClass: any = ServiceRegistry.getClass(serviceName);
     if (!serviceClass.allowRemote)
       return null;
     if (typeof data === 'string')
       data = JSON.parse(data);
 
-    let service: any = Service.get(serviceName);
+    let service: any = ServiceRegistry.get(serviceName);
     return service[functionName].apply(service, data);
   }
   callRemoteService(serviceName: string, serviceInfo: any, functionName: string, data: any) {

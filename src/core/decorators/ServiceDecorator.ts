@@ -1,18 +1,37 @@
-import Service from "../Service";
+import ServiceRegistry from "../ServiceRegistry";
 
 
-export function AsService(clazz: Function) {
-  Service.register(clazz);
+export function Service(clazz: Function) {
+  ServiceRegistry.register(clazz);
+}
+
+export function LocalService(clazz: Function) {
+  ServiceRegistry.register(clazz, true);
+}
+
+const OPTIONAL_SERVICE = Symbol('OPTIONAL')
+
+export function OptionalService(serviceNameOrTarget: any, key: string): any {
+  return Reflect.defineMetadata(OPTIONAL_SERVICE, true, serviceNameOrTarget, key);
 }
 
 
-export function AutoService(serviceNameOrTarget?: any, key?: string): any {
+export function InjectService(serviceNameOrTarget?: any, key?: string): any {
   const apply = function (target: any, key: string): any {
     const type = Reflect.getMetadata("design:type", target, key);
+    const typeName = typeof serviceNameOrTarget === 'string' ? serviceNameOrTarget : type.name;
+    const optional = Reflect.getMetadata(OPTIONAL_SERVICE, target, key) || false;
     const prop = Reflect.getOwnPropertyDescriptor(target, key);
     // property getter
-    var getter = function () {
-      return Service.get(type.name);
+    var getter = function (): any {
+      try {
+        ServiceRegistry.get(typeName);
+      } catch (e) {
+        if (!optional) {
+           throw new Error('Unable to load service : ' + typeName)
+        }
+        return null;
+      }
     };
 
     // property setter
@@ -30,3 +49,6 @@ export function AutoService(serviceNameOrTarget?: any, key?: string): any {
     return apply;
   } else return apply(serviceNameOrTarget, key);
 }
+
+// export const AsService = Service;
+// export const AutoService = InjectService;

@@ -9,12 +9,12 @@ import { Server } from 'http';
 import Utils from './Utils';
 import { RestBuilder } from './RESTBuilder';
 import { LOGGER, RESTCONTROLLER_META_KEY, METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, CONTEXT_META_KEY, SUCCESS_CODE_META_KEY } from './Constant';
-import { AsService } from './decorators';
+import { Service } from './decorators';
 //import { registerRestPoint } from './RESTUtils';
 const collection = 'cache';
 
 
-@AsService
+@Service
 export default class RESTService {
   private app: Express;
   private server: Server;
@@ -129,30 +129,30 @@ export default class RESTService {
     }
   }
   get(path: string, handler: Function) {
-    LOGGER.debug('REST register method: GET, path:', path);
+    LOGGER.debug('HTTP register method: GET, path:', path);
     this.app.get(path, (...args: Array<any>) => {
-      LOGGER.debug('REST call method: GET path:', path);
+      LOGGER.debug('HTTP call method: GET path:', path);
       return handler.apply(null, args);
     });
   }
   post(path: string, handler: Function) {
-    LOGGER.debug('REST register method: POST, path:', path);
+    LOGGER.debug('HTTP register method: POST, path:', path);
     this.app.post(path, (...args: Array<any>) => {
-      LOGGER.debug('REST call method: POST, path:', path);
+      LOGGER.debug('HTTP call method: POST, path:', path);
       return handler.apply(null, args);
     });
   }
   put(path: string, handler: Function) {
-    LOGGER.debug('REST register method: PUT, path:', path);
+    LOGGER.debug('HTTP register method: PUT, path:', path);
     this.app.put(path, (...args: Array<any>) => {
-      LOGGER.debug('REST call method: PUT, path:', path);
+      LOGGER.debug('HTTP call method: PUT, path:', path);
       return handler.apply(null, args);
     });
   }
   delete(path: string, handler: Function) {
-    LOGGER.debug('REST register method: DELETE, path:', path);
+    LOGGER.debug('HTTP register method: DELETE, path:', path);
     this.app.delete(path, (...args: Array<any>) => {
-      LOGGER.debug('REST call method: DELETE, path:', path);
+      LOGGER.debug('HTTP call method: DELETE, path:', path);
       return handler.apply(null, args);
     });
   }
@@ -164,6 +164,12 @@ export default class RESTService {
     }, time * 1000);
     this.tokens[token] = true;
     return token;
+  }
+  addRessource(urls: string[], path: string) {
+    let handler = (req: express.Request, res: express.Response) => {
+      res.sendFile(path);
+    }
+    urls.forEach(url => this.get(url, handler));
   }
   isAllowedToken(token: string) {
     return this.tokens[token] && true || false;
