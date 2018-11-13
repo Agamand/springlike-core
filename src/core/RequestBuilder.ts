@@ -2,6 +2,9 @@ import request from 'request';
 import Path from 'path';
 import { Stream } from 'stream';
 import { LOGGER } from './Constant';
+
+const requestApi = request.defaults({ jar: true })
+
 export class RequestBuilder {
   _host: string = 'localhost';
   _protocol: string = 'http'
@@ -101,7 +104,7 @@ export class RequestBuilder {
         //   }
         //   resolve(response);
         // })
-        let req = request({
+        let req = requestApi({
           method: me._method,
           url: url,
           headers: me._header,
@@ -137,8 +140,6 @@ export class RequestBuilder {
         else {
           req.write(me._params["body"]);
         }
-
-
       });
     }
   }
