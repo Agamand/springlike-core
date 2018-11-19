@@ -1,6 +1,7 @@
 import { suite, test, slow, timeout } from "mocha-typescript";
+import { PathParam, Path, QueryParam, Body, POST } from 'aga-rest-decorator'
 import chai from 'chai'
-import { createClient, PathParam, Path, QueryParam, Body, POST, IParamProvider } from "./index";
+import { createClient, IParamProvider } from "./index";
 
 
 @Path('/anything/:a')

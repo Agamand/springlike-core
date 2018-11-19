@@ -1,9 +1,10 @@
 import CacheService from "./CacheService";
 import { URL } from "url";
 import ServiceRegistry from "./ServiceRegistry";
-import { METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, LOGGER, SUCCESS_CODE_META_KEY } from "./Constant";
+import { LOGGER } from "./Constant";
 import { RequestBuilder } from "./RequestBuilder";
 import request from 'request';
+import { PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, METHOD_META_KEY, SUCCESS_CODE_META_KEY, BODY_META_KEY } from "aga-rest-decorator";
 
 export interface IParamProvider {
   resolve(): Promise<any>
@@ -33,7 +34,7 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
   const url: URL = new URL(baseUrl);
   const cacheService: CacheService = ServiceRegistry.get('CacheService');
 
-  const pathClazz = Reflect.getOwnMetadata(PATH_META_KEY, clazz.prototype) || '/';
+  const pathClazz = Reflect.getMetadata(PATH_META_KEY, clazz.prototype) || '/';
   const queryParamClazz: any = {};
   const pathParamClazz: any = {}
   const headerParamClazz: any = {};
@@ -44,13 +45,13 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
       continue;
 
     if (Reflect.hasOwnMetadata(QUERY_PARAM_META_KEY, clazz.prototype, key.toString())) {
-      queryParamClazz[key] = Reflect.getOwnMetadata(QUERY_PARAM_META_KEY, clazz.prototype, key.toString())
+      queryParamClazz[key] = Reflect.getMetadata(QUERY_PARAM_META_KEY, clazz.prototype, key.toString())
     }
     if (Reflect.hasOwnMetadata(PATH_PARAM_META_KEY, clazz.prototype, key.toString())) {
-      pathParamClazz[key] = Reflect.getOwnMetadata(PATH_PARAM_META_KEY, clazz.prototype, key.toString())
+      pathParamClazz[key] = Reflect.getMetadata(PATH_PARAM_META_KEY, clazz.prototype, key.toString())
     }
     if (Reflect.hasOwnMetadata(HEADER_PARAM_META_KEY, clazz.prototype, key.toString())) {
-      headerParamClazz[key] = Reflect.getOwnMetadata(HEADER_PARAM_META_KEY, clazz.prototype, key.toString())
+      headerParamClazz[key] = Reflect.getMetadata(HEADER_PARAM_META_KEY, clazz.prototype, key.toString())
     }
   }
 
@@ -59,18 +60,18 @@ export function createClient(baseUrl: string, clazz: Function, paramProvider?: I
   return new Proxy(instance, {
     get: function (target: any, key: PropertyKey) {
 
-      const method = Reflect.getOwnMetadata(METHOD_META_KEY, clazz.prototype, key.toString());
+      const method = Reflect.getMetadata(METHOD_META_KEY, clazz.prototype, key.toString());
       if (!method || typeof target[key] != 'function') {
         return target[key];
       }
 
 
-      const path = Reflect.getOwnMetadata(PATH_META_KEY, clazz.prototype, key.toString()) || '/';
-      const successCode = Reflect.getOwnMetadata(SUCCESS_CODE_META_KEY, clazz.prototype, key.toString());
-      const queryParam = Reflect.getOwnMetadata(QUERY_PARAM_META_KEY, clazz.prototype, key.toString());
-      const pathParam = Reflect.getOwnMetadata(PATH_PARAM_META_KEY, clazz.prototype, key.toString());
-      const headerParam = Reflect.getOwnMetadata(HEADER_PARAM_META_KEY, clazz.prototype, key.toString());
-      const bodyIndex = Reflect.getOwnMetadata(BODY_META_KEY, clazz.prototype, key.toString());
+      const path = Reflect.getMetadata(PATH_META_KEY, clazz.prototype, key.toString()) || '/';
+      const successCode = Reflect.getMetadata(SUCCESS_CODE_META_KEY, clazz.prototype, key.toString());
+      const queryParam = Reflect.getMetadata(QUERY_PARAM_META_KEY, clazz.prototype, key.toString());
+      const pathParam = Reflect.getMetadata(PATH_PARAM_META_KEY, clazz.prototype, key.toString());
+      const headerParam = Reflect.getMetadata(HEADER_PARAM_META_KEY, clazz.prototype, key.toString());
+      const bodyIndex = Reflect.getMetadata(BODY_META_KEY, clazz.prototype, key.toString());
 
       return async function (...args: Array<any>) {
 

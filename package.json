@@ -11,7 +11,7 @@
     "clean": "rimraf lib types",
     "build": "npm run clean && tsc  && npm run docs",
     "docs": "typedoc --out docs --theme minimal --mode file src",
-    "test": "nyc --reporter=junit mocha --reporter mocha-junit-reporter lib/tests/*.spec.js --exit || echo Failing tests", 
+    "test": "nyc --reporter=junit mocha --reporter mocha-junit-reporter lib/tests/*.spec.js --exit || echo Failing tests",
     "test:mocha": "mocha lib/tests/*.spec.js --exit || echo Failing tests",
     "coverage": "nyc report --reporter=cobertura"
   },
@@ -20,6 +20,7 @@
   "dependencies": {
     "@types/request": "^2.47.0",
     "adm-zip": "^0.4.11",
+    "aga-rest-decorator": "^1.0.0-SNAPSHOT",
     "cookie-session": "^2.0.0-beta.3",
     "express": "^4.16.2",
     "log4js": "^3.0.5",

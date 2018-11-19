@@ -6,13 +6,13 @@ import cookieSession from 'cookie-session'
 import bodyParser from 'body-parser';
 import ConfigMgr from './ConfigMgr';
 import { Server } from 'http';
+import path from 'path'
+import fs from 'fs'
 import Utils from './Utils';
 import { RestBuilder } from './RESTBuilder';
-import { LOGGER, RESTCONTROLLER_META_KEY, METHOD_META_KEY, PATH_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, CONTEXT_META_KEY, SUCCESS_CODE_META_KEY } from './Constant';
+import { LOGGER } from './Constant';
 import { Service } from './decorators';
-//import { registerRestPoint } from './RESTUtils';
-const collection = 'cache';
-
+import { RESTCONTROLLER_META_KEY, PATH_META_KEY, METHOD_META_KEY, SUCCESS_CODE_META_KEY, QUERY_PARAM_META_KEY, PATH_PARAM_META_KEY, HEADER_PARAM_META_KEY, BODY_META_KEY, CONTEXT_META_KEY } from 'aga-rest-decorator';
 
 @Service
 export default class RESTService {
@@ -50,7 +50,7 @@ export default class RESTService {
     Utils.loadFiles(regexp, baseDir).forEach((entry: any) => {
       if (typeof entry == 'function') {
         if (entry.prototype) {
-          let isRest: boolean = Reflect.getOwnMetadata(RESTCONTROLLER_META_KEY, entry.prototype);
+          let isRest: boolean = Reflect.getMetadata(RESTCONTROLLER_META_KEY, entry.prototype);
           if (isRest) {
             this.loadRestController(entry);
           }
@@ -71,18 +71,18 @@ export default class RESTService {
 
     let props = Object.getOwnPropertyNames(restController.prototype);
 
-    const restPath = Reflect.getOwnMetadata(PATH_META_KEY, restController.prototype) || '/';
+    const restPath = Reflect.getMetadata(PATH_META_KEY, restController.prototype) || '/';
     for (let key of props) {
-      const method = Reflect.getOwnMetadata(METHOD_META_KEY, restController.prototype, key.toString());
+      const method = Reflect.getMetadata(METHOD_META_KEY, restController.prototype, key.toString());
       if (!method)
         continue;
-      const path = Reflect.getOwnMetadata(PATH_META_KEY, restController.prototype, key.toString());
-      const successCode = Reflect.getOwnMetadata(SUCCESS_CODE_META_KEY, restController.prototype, key.toString());
-      const queryParams = Reflect.getOwnMetadata(QUERY_PARAM_META_KEY, restController.prototype, key.toString());
-      const pathParams = Reflect.getOwnMetadata(PATH_PARAM_META_KEY, restController.prototype, key.toString());
-      const headerParams = Reflect.getOwnMetadata(HEADER_PARAM_META_KEY, restController.prototype, key.toString());
-      const bodyIndex = Reflect.getOwnMetadata(BODY_META_KEY, restController.prototype, key.toString());
-      const contextIndex = Reflect.getOwnMetadata(CONTEXT_META_KEY, restController.prototype, key.toString());
+      const path = Reflect.getMetadata(PATH_META_KEY, restController.prototype, key.toString());
+      const successCode = Reflect.getMetadata(SUCCESS_CODE_META_KEY, restController.prototype, key.toString());
+      const queryParams = Reflect.getMetadata(QUERY_PARAM_META_KEY, restController.prototype, key.toString());
+      const pathParams = Reflect.getMetadata(PATH_PARAM_META_KEY, restController.prototype, key.toString());
+      const headerParams = Reflect.getMetadata(HEADER_PARAM_META_KEY, restController.prototype, key.toString());
+      const bodyIndex = Reflect.getMetadata(BODY_META_KEY, restController.prototype, key.toString());
+      const contextIndex = Reflect.getMetadata(CONTEXT_META_KEY, restController.prototype, key.toString());
 
       let builder = new RestBuilder().method(method);
       let mapping: string[] = [];
@@ -165,11 +165,17 @@ export default class RESTService {
     this.tokens[token] = true;
     return token;
   }
-  addRessource(urls: string[], path: string) {
-    let handler = (req: express.Request, res: express.Response) => {
-      res.sendFile(path);
+  addRessource(urls: string[], pathString: string) {
+    let stat = fs.statSync(pathString);
+
+    if (stat.isDirectory) {
+      urls.forEach(url => this.app.use(url, express.static(pathString)));
+    } else {
+      let handler = (req: express.Request, res: express.Response) => {
+        res.sendFile(pathString);
+      }
+      urls.forEach(url => this.get(url, handler));
     }
-    urls.forEach(url => this.get(url, handler));
   }
   isAllowedToken(token: string) {
     return this.tokens[token] && true || false;
