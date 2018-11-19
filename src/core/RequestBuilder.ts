@@ -89,25 +89,15 @@ export class RequestBuilder {
         const url = `${me._protocol}://${me._host}${me.computePath()}`;
         LOGGER.debug('call request on ', url, me._host, me._path);
 
-        // request({
-        //   method: me._method,
-        //   url: url,
-        //   headers: me._header,
-        //   body: me._params["body"] || null,
-        //   json: true
-        // }, function (error: any, response: request.Response, body: any) {
-        //   if (error) {
-        //     return reject(error);
-        //   }
-        //   if (me._successCode != response.statusCode) {
-        //     return reject(new Error('got a ' + response.statusCode + ' status code'));
-        //   }
-        //   resolve(response);
-        // })
+        let headers = {
+          'content-type': 'application/json',
+          ...me._header
+        }
+
         let req = requestApi({
           method: me._method,
           url: url,
-          headers: me._header,
+          headers: headers,
         }).on('error', (error) => {
           if (error) {
             return reject(error);
