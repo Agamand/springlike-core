@@ -1,0 +1,23 @@
+{
+  "parent":"../",
+  "name": "aga-core",
+  "description": "",
+  "main": "lib/index.js",
+  "dependencies": {
+    "adm-zip": "^0.4.11",
+    "aga-rest-decorator": "ws",
+    "cookie-session": "^2.0.0-beta.3",
+    "express": "^4.16.2",
+    "moment": "^2.20.1"
+  },
+  "publishConfig": {
+    "registry": "http://npm.agamand.com"
+  },
+  "devDependencies": {
+    "@types/request": "^2.47.0",
+    "@types/adm-zip": "^0.4.31",
+    "@types/body-parser": "^1.17.0",
+    "@types/cookie-session": "^2.0.35",
+    "@types/express": "^4.16.0"
+  }
+}
