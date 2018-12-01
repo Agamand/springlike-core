@@ -1,6 +1,10 @@
-const path = require('path'),
-  appDir = path.dirname(require.main.filename);
-const logger = require('log4js').getLogger();
+import path from 'path'
+import log4js from 'log4js';
+import { LOGGER } from './Constant';
+const appDir = path.dirname(require.main.filename);
+
+
+
 export default class ConfigMgr {
   static config: any = {}
   static mandatory: Array<string> = [
@@ -9,7 +13,7 @@ export default class ConfigMgr {
   private constructor() { }
   public static load(config: any) {
     if (typeof config == 'string') {
-      logger.debug(appDir, config, path.resolve(appDir, config));
+      LOGGER.debug(appDir, config, path.resolve(appDir, config));
       require(path.resolve(appDir, config));
       return this;
     }
@@ -29,11 +33,21 @@ export default class ConfigMgr {
   public static set(path: string, value: any) {
     this.traverseAndSet(path, value);
   }
-  public static parse(args: Array<string>) {
+  public static parse(args: string[]) {
     let iterator = args[Symbol.iterator]();
     for (let r; !(r = iterator.next()).done;) {
       let value = r.value;
-      logger.debug('parse %s %s', value, typeof value)
+      LOGGER.debug('parse %s %s', value, typeof value)
+
+      if ('-c' === value || '--config' === value) {
+        if (!(r = iterator.next()).done) {
+          let cpath = r.value;
+          if (!path.isAbsolute(r.value))
+            cpath = path.join(process.cwd(), cpath)
+          ConfigMgr.load(cpath);
+        }
+      }
+
       if (value.startsWith('-D')) {
         let key = value.substring(2);
         if (!(r = iterator.next()).done) {
