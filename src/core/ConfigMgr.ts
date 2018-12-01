@@ -14,7 +14,9 @@ export default class ConfigMgr {
   public static load(config: any) {
     if (typeof config == 'string') {
       LOGGER.debug(appDir, config, path.resolve(appDir, config));
-      require(path.resolve(appDir, config));
+      let data = require(path.resolve(appDir, config));
+      if (data)
+        ConfigMgr.load(data);
       return this;
     }
     ConfigMgr.merge(ConfigMgr.config, config);
