@@ -4,8 +4,7 @@ import log4js from 'log4js'
 import crypto from 'crypto';
 import moment from 'moment';
 
-const appDir = path.dirname(require.main.filename),
-  logger = log4js.getLogger();
+const appDir = path.dirname(require.main.filename);
 const CONSTRUCTOR = "constructor";
 const exclude = /node_modules|\.git/
 const STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg,

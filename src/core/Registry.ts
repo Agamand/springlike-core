@@ -22,3 +22,5 @@ export class InstanceRegistry extends Registry<FunctionConstructor> {
     return this.instances[name];
   }
 }
+
+export class ClassRegistry extends Registry<FunctionConstructor> {}

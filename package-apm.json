@@ -4,6 +4,7 @@
   "description": "",
   "main": "lib/index.js",
   "dependencies": {
+    "log4js": "^3.0.6",
     "adm-zip": "^0.4.11",
     "aga-rest-decorator": "ws",
     "cookie-session": "^2.0.0-beta.3",

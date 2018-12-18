@@ -3,10 +3,9 @@ import path from 'path';
 import fs from 'fs';
 import Utils from './Utils';
 import "reflect-metadata";
-import RemoteService from './RemoteService';
+//import RemoteService from './RemoteService';
 import { LOGGER } from './Constant';
-import { SMap } from '../tests';
-
+import { SMap } from './CommonTypes';
 const appDir = path.dirname(require.main.filename);
 export class CServiceRegistry {
   services: SMap<any> = {}
@@ -44,10 +43,11 @@ export class CServiceRegistry {
 
 
     let instance = null;
-    if (this.services[className].allowRemote && remoteConf.enable && !serviceConf[className]) {
-      LOGGER.debug('Instanciate remote', className);
-      instance = Remote(className);
-    } else {
+    // if (this.services[className].allowRemote && remoteConf.enable && !serviceConf[className]) {
+    //   LOGGER.debug('Instanciate remote', className);
+    //   instance = Remote(className);
+    // } else
+    {
       LOGGER.debug('Instanciate', className);
       instance = new this.services[className]();
 
@@ -75,17 +75,17 @@ const ServiceRegistry = new CServiceRegistry();
 export default ServiceRegistry;
 
 
-let Remote = (serviceName: string) => {
-  const remoteService: RemoteService = ServiceRegistry.get("RemoteService")
-  let serviceClass = ServiceRegistry.getClass(serviceName);
-  let functions = Utils.getClassFunction(serviceClass);
-  return new Proxy({}, {
-    get: function (obj, target) {
-      return function (...args: Array<any>) {
-        return remoteService.getRemoteService(serviceName).then((serviceInfo) => {
-          return remoteService.callRemoteService(serviceName, serviceInfo, target.toString(), args);
-        });
-      }
-    }
-  });
-}
+// let Remote = (serviceName: string) => {
+//   const remoteService: RemoteService = ServiceRegistry.get("RemoteService")
+//   let serviceClass = ServiceRegistry.getClass(serviceName);
+//   let functions = Utils.getClassFunction(serviceClass);
+//   return new Proxy({}, {
+//     get: function (obj, target) {
+//       return function (...args: Array<any>) {
+//         return remoteService.getRemoteService(serviceName).then((serviceInfo) => {
+//           return remoteService.callRemoteService(serviceName, serviceInfo, target.toString(), args);
+//         });
+//       }
+//     }
+//   });
+// }
