@@ -1,5 +1,5 @@
 import path from 'path'
-import log4js from 'log4js';
+import fs from 'fs';
 import { LOGGER } from './Constant';
 const appDir = path.dirname(require.main.filename);
 
@@ -13,10 +13,24 @@ export default class ConfigMgr {
   private constructor() { }
   public static load(config: any) {
     if (typeof config == 'string') {
-      LOGGER.debug(appDir, config, path.resolve(appDir, config));
-      let data = require(path.resolve(appDir, config));
-      if (data)
-        ConfigMgr.load(data);
+      let resolvedPath = path.resolve(appDir, config);
+      LOGGER.debug(appDir, config, resolvedPath);
+      let ext = path.extname(resolvedPath);
+      switch (ext) {
+        case '.js':
+          let jsText = fs.readFileSync(resolvedPath).toString();
+          eval(jsText);
+          break;
+        case '.json':
+          let data = require(resolvedPath);
+          if (data)
+            ConfigMgr.load(data);
+          break;
+        default:
+          LOGGER.debug('unsupported config file format :', ext);
+      }
+
+
       return this;
     }
     ConfigMgr.merge(ConfigMgr.config, config);
