@@ -70,4 +70,38 @@ export default class Utils {
     }
     return obj;
   }
+  public static merge(dest: any, cfg: any) {
+    var me = this;
+    if (cfg instanceof Object) {
+      for (var i in cfg) {
+        if (cfg[i] instanceof Object && !(cfg[i] instanceof Array) && !(typeof cfg[i] == 'function')) {
+          if (!dest[i])
+            dest[i] = {};
+          Utils.merge(dest[i], cfg[i]);
+        } else {
+          dest[i] = cfg[i];
+        }
+      }
+    }
+    return dest;
+  }
+  public static traverse(obj: any, path: string) {
+    var tmp = obj;
+    const pathPart = path.split('.');
+    for (var i = 0, len = pathPart.length; i < len && tmp; i++)
+      tmp = tmp[pathPart[i]];
+    return tmp;
+  }
+  public static traverseAndSet(obj: any, path: string, value: any) {
+    var tmp = obj;
+    const pathPart = path.split('.');
+    var i = 0,
+      len = pathPart.length - 1;
+    for (; i < len && tmp; i++) {
+      tmp = tmp[pathPart[i]] || (tmp[pathPart[i]] = {});
+
+    }
+    return tmp[pathPart[len]] = value;
+
+  }
 }
