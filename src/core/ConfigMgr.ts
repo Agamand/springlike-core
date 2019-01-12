@@ -5,8 +5,34 @@ import Utils from './Utils';
 const appDir = path.dirname(require.main.filename);
 
 
+export const Config = (path: string, defaultValue?: any) => {
+  return function (target: any, key: string): any {
+    const type = Reflect.getMetadata("design:type", target, key);
+    
+    const prop = Reflect.getOwnPropertyDescriptor(target, key);
+    // property getter
+    var getter = function (): any {
+      try {
+        return ConfigMgr.get(path,defaultValue);
+      } catch (e) {
+        return null;
+      }
+    };
 
-export default class ConfigMgr {
+    // property setter
+    var setter = function (newVal: any) {
+    };
+    // Create new property with getter and setter
+    Object.defineProperty(target, key, {
+      get: getter,
+      set: setter,
+      enumerable: true,
+      configurable: true
+    });
+  }
+}
+
+export class ConfigMgr {
   static config: any = {}
   static mandatory: Array<string> = [
     //'discord.token', 'eve.api.client_id', 'eve.api.client_secret', 'eve.api.callback', 'eve.api.scope'

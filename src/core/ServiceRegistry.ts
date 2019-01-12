@@ -1,4 +1,4 @@
-import ConfigMgr from './ConfigMgr'
+import {ConfigMgr} from './ConfigMgr'
 import path from 'path';
 import fs from 'fs';
 import Utils from './Utils';

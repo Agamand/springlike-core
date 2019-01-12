@@ -1,4 +1,4 @@
-export { default as ConfigMgr } from './ConfigMgr';
+export * from './ConfigMgr';
 export { default as Container } from './Container';
 export { default as Utils } from './Utils';
 export { ArchiveUtils, Zip } from './ArchiveUtils';

@@ -1,5 +1,5 @@
 import cluster from 'cluster';
-import ConfigMgr from './ConfigMgr';
+import {ConfigMgr} from './ConfigMgr';
 /* application container*/
 const defaultConfig = {
   cluster: 0
