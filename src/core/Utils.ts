@@ -17,7 +17,7 @@ export default class Utils {
     return ((+value) / 10000000 - 11644473600) * 1000
   }
   public static formatDate(timestamp: string | number): string {
-    var date = isNaN(+timestamp) ? new Date(timestamp) : new Date(+timestamp);
+    let date = isNaN(+timestamp) ? new Date(timestamp) : new Date(+timestamp);
     return moment(date).utc().format("DD/MM/YY, HH:mm [EVETIME]")
   }
   public static loadFiles(regexp: string | RegExp, baseFolder: string): Array<Object> {
@@ -28,7 +28,7 @@ export default class Utils {
     let result = [];
     while (folders.length) {
       let current = folders.pop();
-      var dirs = fs.readdirSync(current);
+      let dirs = fs.readdirSync(current);
 
       for (let dir of dirs) {
 
@@ -71,9 +71,9 @@ export default class Utils {
     return obj;
   }
   public static merge(dest: any, cfg: any) {
-    var me = this;
+    let me = this;
     if (cfg instanceof Object) {
-      for (var i in cfg) {
+      for (let i in cfg) {
         if (cfg[i] instanceof Object && !(cfg[i] instanceof Array) && !(typeof cfg[i] == 'function')) {
           if (!dest[i])
             dest[i] = {};
@@ -86,16 +86,16 @@ export default class Utils {
     return dest;
   }
   public static traverse(obj: any, path: string) {
-    var tmp = obj;
+    let tmp = obj;
     const pathPart = path.split('.');
-    for (var i = 0, len = pathPart.length; i < len && tmp; i++)
+    for (let i = 0, len = pathPart.length; i < len && tmp; i++)
       tmp = tmp[pathPart[i]];
     return tmp;
   }
   public static traverseAndSet(obj: any, path: string, value: any) {
-    var tmp = obj;
+    let tmp = obj;
     const pathPart = path.split('.');
-    var i = 0,
+    let i = 0,
       len = pathPart.length - 1;
     for (; i < len && tmp; i++) {
       tmp = tmp[pathPart[i]] || (tmp[pathPart[i]] = {});
@@ -103,5 +103,30 @@ export default class Utils {
     }
     return tmp[pathPart[len]] = value;
 
+  }
+  //original code from https://stackoverflow.com/questions/16697791/nodejs-get-filename-of-caller-function/29581862#29581862
+  public static getCallerFile() {
+    let originalFunc = Error.prepareStackTrace;
+    let callerfile;
+    try {
+      let err = new Error();
+      let currentfile;
+
+      Error.prepareStackTrace = function (err, stack) { return stack; };
+      let stack: NodeJS.CallSite[] = <any>err.stack;
+      //skip current
+      stack.shift();
+      currentfile = stack.shift().getFileName();
+
+      while (stack.length) {
+        callerfile = stack.shift().getFileName();
+
+        if (currentfile !== callerfile) break;
+      }
+    } catch (e) { }
+
+    Error.prepareStackTrace = originalFunc;
+
+    return callerfile;
   }
 }

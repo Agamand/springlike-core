@@ -23,4 +23,8 @@ export class InstanceRegistry extends Registry<FunctionConstructor> {
   }
 }
 
+export const Register = ()=>{
+  
+}
+
 export class ClassRegistry extends Registry<FunctionConstructor> {}
