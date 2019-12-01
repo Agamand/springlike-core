@@ -1,4 +1,4 @@
-import {ConfigMgr} from './ConfigMgr'
+import { ConfigMgr } from './ConfigMgr'
 import path from 'path';
 import fs from 'fs';
 import Utils from './Utils';
@@ -6,7 +6,32 @@ import "reflect-metadata";
 //import RemoteService from './RemoteService';
 import { LOGGER } from './Constant';
 import { SMap } from './CommonTypes';
+import { SERVICE_TYPE, serviceGenerator, getSecurityCheck } from './decorators/ServiceDecorator';
 const appDir = path.dirname(require.main.filename);
+const CONTEXT_PROP = "context";
+
+
+export function wrapContext<T>(object: any, context: any) {
+  return <T>new Proxy(object, {
+    get: function (target, key) {
+      let serviceType = Reflect.getMetadata(SERVICE_TYPE, target, <any>key);
+      if (CONTEXT_PROP === key && context)
+        return context;
+      else if (serviceType) {
+        return serviceGenerator(target, key, serviceType, context)();
+      }
+      let checks = getSecurityCheck(target, key);
+      if (checks.length && context)
+        for (const check of checks) {
+          if (!check(context))
+            throw new Error('invalid access');
+        }
+      return target[key];
+    }
+  })
+}
+
+
 export class CServiceRegistry {
   services: SMap<any> = {}
   instance: SMap<any> = {}
@@ -21,20 +46,21 @@ export class CServiceRegistry {
     this.services[clazz.name] = clazz
     this.localService[clazz.name] = local
   }
-  getClass<T extends Function=Function>(className: string): T {
+  getClass<T extends Function = Function>(className: string): T {
     if (!this.services[className]) {
       throw new Error('unknow service ' + className)
     }
     return <T>this.services[className];
   }
 
-  get<T extends Object=Object>(className: string): T {
+  get<T extends Object = Object>(className: string, context?: any): T {
     const serviceConf = ConfigMgr.get('services', {});
     const remoteConf = ConfigMgr.get('remote', {
       enable: false
     });
+
     if (this.instance[className])
-      return <T>this.instance[className];
+      return wrapContext(this.instance[className], context);
 
 
     if (!this.services[className]) {
@@ -50,9 +76,8 @@ export class CServiceRegistry {
     {
       LOGGER.debug('Instanciate', className);
       instance = new this.services[className]();
-
     }
-    return <T>(this.instance[className] = instance)
+    return wrapContext(this.instance[className] = instance, context);
   }
   preLoad(...serviceName: Array<string>) {
     let service2Preload: { [key: string]: boolean } = {}
