@@ -2,7 +2,7 @@ export class Registry<T>{
   protected data: { [key: string]: T } = {}
   register(dataObject: T, dataName?: String) {
 
-    let name = (<any>dataObject).name || dataName;
+    let name = dataName || (<any>dataObject).name;
     this.data[name] = dataObject;
   }
 
@@ -11,7 +11,10 @@ export class Registry<T>{
   }
 }
 
-export class InstanceRegistry extends Registry<FunctionConstructor> {
+
+export class ClassRegistry extends Registry<FunctionConstructor> { }
+
+export class InstanceRegistry extends ClassRegistry {
 
   private instances: { [key: string]: any } = {}
 
@@ -23,8 +26,6 @@ export class InstanceRegistry extends Registry<FunctionConstructor> {
   }
 }
 
-export const Register = ()=>{
-  
-}
+export const Register = () => {
 
-export class ClassRegistry extends Registry<FunctionConstructor> {}
+}
