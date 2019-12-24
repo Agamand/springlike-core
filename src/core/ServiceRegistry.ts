@@ -31,11 +31,26 @@ export function wrapContext<T>(object: any, context: any) {
   })
 }
 
+export interface ServiceProvider {
+
+  hasService(className: string): any;
+  getService(className: string): any;
+
+}
+
+
+class LocalServiceProvider {
+
+
+
+}
+
 
 export class CServiceRegistry {
   services: SMap<any> = {}
   instance: SMap<any> = {}
   localService: SMap<boolean> = {}
+  serviceProvider: ServiceProvider[] = [];
   load(regexp: RegExp | string, basefolder: string) {
     Utils.loadFiles(regexp, basefolder).forEach((service: Object) => {
       this.register(<Function>service);
@@ -98,6 +113,9 @@ export class CServiceRegistry {
 const ServiceRegistry = new CServiceRegistry();
 
 export default ServiceRegistry;
+
+
+
 
 
 // let Remote = (serviceName: string) => {
