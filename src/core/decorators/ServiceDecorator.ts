@@ -10,6 +10,7 @@ export function LocalService(clazz: Function) {
 }
 
 export const SERVICE_TYPE = Symbol('SERVICE_TYPE')
+export const NO_SECURITY = Symbol('NO_SECURITY')
 const SECURITY_CHECK = Symbol('SECURITY_CHECK')
 const OPTIONAL_SERVICE = Symbol('OPTIONAL')
 
@@ -51,6 +52,13 @@ export function SecurityChecker(check: SecurityCheck) {
     return addSecurityCheck(target, key, check);
   }
 }
+
+
+export function NoSecurity(target: any): any {
+  return Reflect.defineMetadata(NO_SECURITY, true, target);
+}
+
+
 
 export function InjectService(serviceNameOrTarget?: any, key?: string): any {
 

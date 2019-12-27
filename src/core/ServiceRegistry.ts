@@ -6,25 +6,29 @@ import "reflect-metadata";
 //import RemoteService from './RemoteService';
 import { LOGGER } from './Constant';
 import { SMap } from './CommonTypes';
-import { SERVICE_TYPE, serviceGenerator, getSecurityCheck } from './decorators/ServiceDecorator';
+import { SERVICE_TYPE, serviceGenerator, getSecurityCheck, NO_SECURITY } from './decorators/ServiceDecorator';
 const appDir = path.dirname(require.main.filename);
 const CONTEXT_PROP = "context";
 
+export class InvalidAccessError extends Error { }
 
 export function wrapContext<T>(object: any, context: any) {
   return <T>new Proxy(object, {
     get: function (target, key) {
       let serviceType = Reflect.getMetadata(SERVICE_TYPE, target, <any>key);
+      let noSecurity = Reflect.getMetadata(NO_SECURITY, target.constructor);
+      if (noSecurity)
+        context = { ...context, noSecurity: !!noSecurity }
       if (CONTEXT_PROP === key && context)
         return context;
       else if (serviceType) {
         return serviceGenerator(target, key, serviceType, context)();
       }
       let checks = getSecurityCheck(target, key);
-      if (checks.length && context)
+      if (context && !context.noSecurity && checks.length && context)
         for (const check of checks) {
           if (!check(context))
-            throw new Error('invalid access');
+            throw new InvalidAccessError('invalid access');
         }
       return target[key];
     }
