@@ -4,12 +4,14 @@ import log4js from 'log4js'
 import crypto from 'crypto';
 import moment from 'moment';
 
+import { reviveAs } from '@springlike/type-registry'
+
 const appDir = path.dirname(require.main.filename);
 const CONSTRUCTOR = "constructor";
 const exclude = /node_modules|\.git/
 const STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg,
   ARGUMENT_NAMES = /([^\s,]+)/g
-export default class Utils {
+export class Utils {
   private constructor() {
 
   }
@@ -104,6 +106,27 @@ export default class Utils {
     return tmp[pathPart[len]] = value;
 
   }
+
+
+  public static traverseAndCopy(obj: any, path: string, original: any) {
+    let tmp = obj;
+    let tmpO = original;
+    const pathPart = path.split('.');
+    let i = 0,
+      len = pathPart.length - 1;
+    for (; i < len && tmp; i++) {
+      tmpO = tmpO[pathPart[i]];
+      if (tmpO === undefined)
+        return;
+      tmp = tmp[pathPart[i]] || (tmp[pathPart[i]] = tmpO.constructor ? reviveAs({}, tmpO.constructor) : {});
+    }
+    let value = tmpO[pathPart[len]];
+
+    return tmp[pathPart[len]] = value;
+
+  }
+
+
   //original code from https://stackoverflow.com/questions/16697791/nodejs-get-filename-of-caller-function/29581862#29581862
   public static getCallerFile() {
     let originalFunc = Error.prepareStackTrace;
@@ -129,4 +152,36 @@ export default class Utils {
 
     return callerfile;
   }
+}
+
+
+export class ObjectUtils {
+
+
+
+  static project<T>(object: any, projection: { [key: string]: 0 | 1 }): T {
+
+
+    let inclu = Object.values(projection).includes(1);
+
+
+    if (inclu) {
+      let data = {};
+      if (object.constructor)
+        reviveAs(data, object.constructor)
+      for (let p in projection) {
+        let pp = projection[p];
+        if (pp === 1) {
+          Utils.traverseAndCopy(data, p, object);
+        }
+      }
+      return <T>data;
+    } else {
+      for (let p in projection) {
+        Utils.traverseAndSet(object, p, undefined);
+      }
+      return object;
+    }
+  }
+
 }

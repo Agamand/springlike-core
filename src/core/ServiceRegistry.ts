@@ -1,7 +1,7 @@
 import { ConfigMgr } from './ConfigMgr'
 import path from 'path';
 import fs from 'fs';
-import Utils from './Utils';
+import { Utils } from './Utils';
 import "reflect-metadata";
 //import RemoteService from './RemoteService';
 import { LOGGER } from './Constant';

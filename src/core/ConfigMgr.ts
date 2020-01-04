@@ -1,19 +1,19 @@
 import path from 'path'
 import fs from 'fs';
 import { LOGGER } from './Constant';
-import Utils from './Utils';
+import { Utils } from './Utils';
 const appDir = path.dirname(require.main.filename);
 
 
 export const Config = (path: string, defaultValue?: any) => {
   return function (target: any, key: string): any {
     const type = Reflect.getMetadata("design:type", target, key);
-    
+
     const prop = Reflect.getOwnPropertyDescriptor(target, key);
     // property getter
     var getter = function (): any {
       try {
-        return ConfigMgr.get(path,defaultValue);
+        return ConfigMgr.get(path, defaultValue);
       } catch (e) {
         return null;
       }
