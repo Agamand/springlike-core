@@ -154,12 +154,13 @@ export class Utils {
   }
 }
 
+export type Projection = { [key: string]: 0 | 1 }
 
 export class ObjectUtils {
 
 
 
-  static project<T>(object: any, projection: { [key: string]: 0 | 1 }): T {
+  static project<T>(object: any, projection: Projection): T {
 
 
     let inclu = Object.values(projection).includes(1);
