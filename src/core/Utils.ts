@@ -22,6 +22,19 @@ export class Utils {
     let date = isNaN(+timestamp) ? new Date(timestamp) : new Date(+timestamp);
     return moment(date).utc().format("DD/MM/YY, HH:mm [EVETIME]")
   }
+  public static toMap<T>(array: T[], mapper: (a: T) => any): { [key: string]: T } {
+    return array.reduce((p: any, c: T) => {
+      p[mapper(c)] = c;
+      return p;
+    }, {});
+  }
+  public static toMapNumber<T>(array: T[], mapper: (a: T) => number): { [key: number]: T } {
+    return this.toMap(array, mapper);
+  }
+  public static toMapString<T>(array: T[], mapper: (a: T) => string): { [key: string]: T } {
+    return this.toMap(array, mapper);
+  }
+
   public static loadFiles(regexp: string | RegExp, baseFolder: string): Array<Object> {
     let root = baseFolder ? (path.isAbsolute(baseFolder) ? baseFolder : appDir + path.sep + baseFolder) : appDir;
     let folders = [root];
