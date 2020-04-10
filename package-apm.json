@@ -14,7 +14,7 @@
     "request": "^2.88.0"
   },
   "publishConfig": {
-    "registry": "http://npm.agamand.com"
+    "registry": "https://npm.agamand.com"
   },
   "devDependencies": {
     "@types/request": "^2.48.1",
