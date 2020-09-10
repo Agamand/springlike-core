@@ -43,11 +43,11 @@ export interface ServiceProvider {
 }
 
 
-class LocalServiceProvider {
+// class LocalServiceProvider implements ServiceProvider {
 
 
 
-}
+// }
 
 
 export class CServiceRegistry {
